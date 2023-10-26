@@ -1,0 +1,68 @@
+{
+  "$schema": "./schema.json",
+  "url": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
+  "urlTime": "https://calendar.lib.ku.edu/ajax/space/times",
+  "urlBook": "https://calendar.lib.ku.edu/ajax/space/book",
+  "users": [
+    {
+      "fname": "Cody",
+      "lname": "Duong",
+      "email": "cody.duong@ku.edu"
+    },
+    {
+      "fname": "Cody",
+      "lname": "Duong",
+      "email": "c766d913@ku.edu"
+    }
+  ],
+  "debug": true,
+  "dryRun": true,
+  "rooms": [
+    {
+      "$comment": "This is for floor 4 high capacity rooms, but not the largest rooms",
+      "continuity": {
+        "base": 0.5,
+        "min": 12
+      },
+      "capacity": {
+        "multiplier": 2,
+        "min": 8
+      },
+      "requiredTimes": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ]
+    },
+    {
+      "$comment": "This is for floor 2 low capacity rooms",
+      "url": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=1&space=0",
+      "continuity": {
+        "base": 0.5,
+        "min": 12
+      },
+      "capacity": {
+        "multiplier": 2,
+        "min": 0,
+        "max": 4
+      },
+      "requiredTimes": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28
+      ]
+    }
+  ]
+}

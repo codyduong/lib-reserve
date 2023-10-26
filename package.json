@@ -1,0 +1,27 @@
+{
+  "name": "ku-lib-reserve",
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "author": "Cody Duong <duongcody507@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --o schema.json"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.4",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "bun-types": "latest",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.0.0",
+    "typescript-json-schema": "^0.62.0"
+  },
+  "peerDependencies": {},
+  "dependencies": {
+    "jsdom": "^22.1.0"
+  }
+}
