@@ -85,20 +85,6 @@ async function reserveTimes(
       const group = queue.shift()!;
       const user = users.pop(); //users.pop();
 
-      // @codyduong REMOVE CONSTANT
-      // eslint-disable-next-line no-constant-condition
-      if (!user?.email && false) {
-        // webhook.ping();
-        webhook.log(
-          `${Temporal.PlainTime.from(
-            group[0].start,
-          ).toString()}-${Temporal.PlainTime.from(
-            group[group.length - 1].end,
-          ).toString()}|FAILED`,
-        );
-        continue;
-      }
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = new FormData();
 
@@ -151,6 +137,11 @@ async function reserveTimes(
           group[group.length - 1].end,
         ).toString()}|${session}`,
       );
+
+      if (!user) {
+        webhook.log(`No user to reserve session with`);
+        continue;
+      }
 
       if (dryRun) {
         webhook.log('#dry_runFoobar');
@@ -240,6 +231,7 @@ async function reserveTimes(
   }
 
   if (numberReserved == 0) {
+    webhook.ping();
     webhook.log('Failed to reserve any rooms! What happened???\n');
   }
 }
