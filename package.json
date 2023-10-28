@@ -22,6 +22,7 @@
   },
   "peerDependencies": {},
   "dependencies": {
+    "@js-temporal/polyfill": "^0.4.4",
     "jsdom": "^22.1.0"
   }
 }

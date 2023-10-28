@@ -2,8 +2,16 @@ import { ConfigurationBase, Runs } from './getConfigurations';
 import { JSDOM } from 'jsdom';
 import getScore from './getScore';
 import reserveTimes, { RoomsToReserve } from './reserveTimes';
+import Webhook from './webhook';
+import Cleanup from './cleanup';
 
-async function runConfigurations(base: ConfigurationBase, runs: Runs) {
+async function runConfigurations(
+  webhook: Webhook,
+  cleanup: Cleanup,
+  base: ConfigurationBase,
+  runs: Runs,
+  ..._args: unknown[]
+): Promise<void> {
   for (const run of runs) {
     const { url } = run;
 
@@ -29,6 +37,9 @@ async function runConfigurations(base: ConfigurationBase, runs: Runs) {
     // reservations are required to be adjacent, otherwise reserve in multiple attempts
     // index is time (0-48),
     const roomsToReserve: RoomsToReserve = [];
+    const zeroRooms: string[] = [];
+
+    webhook.log(`SCORING`);
 
     for (const room of rooms) {
       if (!room.className.includes('panel')) {
@@ -49,7 +60,12 @@ async function runConfigurations(base: ConfigurationBase, runs: Runs) {
       const name = fieldset
         .getElementsByTagName('legend')[0]
         .textContent!.trim();
-      const [score, times] = getScore(fieldset, capacity, run);
+      const [score, times] = getScore(fieldset, capacity, webhook, run);
+
+      if (score == 0) {
+        // Strip out location name
+        zeroRooms.push(name.replace(/^[^\d]*/g, ''));
+      }
 
       let indexToInsertAt = roomsToReserve.findIndex(
         (room) => room.score < score,
@@ -66,6 +82,12 @@ async function runConfigurations(base: ConfigurationBase, runs: Runs) {
       });
     }
 
+    if (zeroRooms.length > 0) {
+      webhook.log(`${zeroRooms.join(',')}:0`);
+    }
+
+    webhook.log('\n');
+
     const lid = new URLSearchParams(run.url).get(run.url.split('=')[0])!;
 
     await reserveTimes(roomsToReserve, base.users, lid, {
@@ -73,6 +95,9 @@ async function runConfigurations(base: ConfigurationBase, runs: Runs) {
       url: url,
       urlTime: run.urlTime,
       urlBook: run.urlBook,
+      dryRun: run.dryRun,
+      webhook,
+      cleanup,
     });
   }
 }

@@ -2,6 +2,7 @@
   "$schema": "./schema.json",
   "url": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
   "urlTime": "https://calendar.lib.ku.edu/ajax/space/times",
+  "urlEnd": "https://calendar.lib.ku.edu/ajax/space/session/end",
   "urlBook": "https://calendar.lib.ku.edu/ajax/space/book",
   "users": [
     {
@@ -38,7 +39,8 @@
         26,
         27,
         28
-      ]
+      ],
+      "dryRun": false
     },
     {
       "$comment": "This is for floor 2 low capacity rooms",
@@ -62,7 +64,18 @@
         26,
         27,
         28
+      ],
+      "blacklist": [
+        "Anschutz 320A",
+        "Anschutz 320B",
+        "Anschutz 320C",
+        "Anschutz 320D",
+        "Anschutz 320E",
+        "Anschutz 320F"
       ]
     }
-  ]
+  ],
+  "webhook": "https://discord.com/api/webhooks/{webhook.id}/{webhook.token}",
+  "ping": ["{discordid}"],
+  "days": 7
 }

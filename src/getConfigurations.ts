@@ -1,3 +1,5 @@
+import { Temporal } from '@js-temporal/polyfill';
+
 export type RunConfiguration = {
   /**
    * @default https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0
@@ -13,6 +15,7 @@ export type RunConfiguration = {
    * @items.maximum 47
    */
   requiredTimes?: number[];
+  blacklist?: string[];
   continuity?: {
     base?: number;
     /**
@@ -56,6 +59,11 @@ export type ConfigurationBase = {
    */
   urlTime: string;
   /**
+   * @default https://calendar.lib.ku.edu/ajax/space/session/end
+   * @TJS-format uri
+   */
+  urlEnd: string;
+  /**
    * @default https://calendar.lib.ku.edu/ajax/space/book
    * @TJS-format uri
    */
@@ -70,9 +78,20 @@ export type ConfigurationBase = {
     email: string;
   }[];
   rooms?: RunConfiguration[];
+  /**
+   * @TJS-format uri
+   */
+  webhook?: string;
+  ping?: string[];
+  /**
+   * Days to reserve in the future
+   * @default 7
+   * @minimum 0
+   */
+  days?: number;
 } & RunConfiguration;
 
-export type Runs = {
+export type Run = {
   lid: string;
   debug: boolean;
   dryRun: boolean;
@@ -82,11 +101,16 @@ export type Runs = {
   requiredTimes: number[];
   continuity: RunConfiguration['continuity'];
   capacity: RunConfiguration['capacity'];
-}[];
+  blacklist: string[];
+};
+
+export type Runs = Run[];
+
+export type Configurations = [ConfigurationBase, Runs, Temporal.PlainDate];
 
 async function getConfiguration(
   configuration_location: string | URL,
-): Promise<[ConfigurationBase, Runs]> {
+): Promise<Configurations> {
   const configuration = JSON.parse(
     await Bun.file(configuration_location, { type: 'application/json' }).text(),
   ) as ConfigurationBase;
@@ -97,6 +121,12 @@ async function getConfiguration(
       'Expected configuration to either contain a url for the base configuraton or for each unique room run configuration',
     );
   }
+
+  const { days = 7 } = configuration;
+  const date = Temporal.Now.zonedDateTimeISO('America/Chicago')
+    .toPlainDate()
+    .add(Temporal.Duration.from(`P${days}D`));
+  const dateString = date.toString();
 
   const runs: Runs = [];
 
@@ -115,7 +145,7 @@ async function getConfiguration(
         debug: configuration.debug ?? false,
         dryRun: configuration.dryRun ?? false,
         ...room,
-        url: `${url}&date=2023-11-02`,
+        url: `${url}&date=${dateString}`,
         requiredTimes: room.requiredTimes ?? configuration.requiredTimes ?? [],
         continuity: {
           ...configuration.continuity,
@@ -125,6 +155,7 @@ async function getConfiguration(
           ...configuration.capacity,
           ...room.capacity,
         },
+        blacklist: room.blacklist ?? configuration.blacklist ?? [],
       });
     });
   } else {
@@ -134,7 +165,7 @@ async function getConfiguration(
 
     runs.push({
       lid,
-      url: `${configuration.url}&date=2023-11-02`,
+      url: `${configuration.url}&date=${dateString}`,
       urlTime: configuration.urlTime,
       urlBook: configuration.urlBook,
       debug: configuration.debug ?? false,
@@ -142,10 +173,11 @@ async function getConfiguration(
       requiredTimes: configuration.requiredTimes ?? [],
       continuity: configuration.continuity,
       capacity: configuration.capacity,
+      blacklist: configuration.blacklist ?? [],
     });
   }
 
-  return [configuration, runs];
+  return [configuration, runs, date];
 }
 
 export default getConfiguration;

@@ -20,6 +20,22 @@ module.exports = {
         sourceType: 'script',
       },
     },
+    {
+      files: ['*.ts', '*.tsx', '*.mts', '*.cts', '*.js', '*.mjs', '*.cjs'],
+      rules: {
+        // '@typescript-eslint/explicit-module-boundary-types': 'warn',
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          {
+            varsIgnorePattern: '^_',
+            argsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+          },
+        ],
+        'no-empty-function': 'warn',
+        '@typescript-eslint/no-empty-function': ['off'], // eslint has this one too
+      },
+    },
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {

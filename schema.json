@@ -3,9 +3,21 @@
     "allOf": [
         {
             "properties": {
+                "days": {
+                    "default": 7,
+                    "description": "Days to reserve in the future",
+                    "minimum": 0,
+                    "type": "number"
+                },
                 "rooms": {
                     "items": {
                         "properties": {
+                            "blacklist": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
                             "capacity": {
                                 "properties": {
                                     "base": {
@@ -106,6 +118,10 @@
                         "type": "object"
                     },
                     "type": "array"
+                },
+                "webhook": {
+                    "format": "uri",
+                    "type": "string"
                 }
             },
             "required": [
@@ -117,6 +133,12 @@
         },
         {
             "properties": {
+                "blacklist": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "capacity": {
                     "properties": {
                         "base": {

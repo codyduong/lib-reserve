@@ -1,6 +1,10 @@
 import { JSDOM } from 'jsdom';
 import { ReservationSlot } from './getScore';
 import { ConfigurationBase } from './getConfigurations';
+import Webhook from './webhook';
+import { Temporal } from '@js-temporal/polyfill';
+import Cleanup from './cleanup';
+import { displaySlots } from './displaySlots';
 
 export type RoomsToReserve = {
   name: string;
@@ -9,10 +13,13 @@ export type RoomsToReserve = {
 }[];
 
 export type ReserveTimesConfiguration = {
-  debug?: boolean;
+  debug: boolean | undefined;
+  dryRun: boolean | undefined;
   url: string;
   urlTime: string;
   urlBook: string;
+  webhook: Webhook;
+  cleanup: Cleanup;
 };
 
 // naively assume sorted
@@ -21,8 +28,11 @@ async function reserveTimes(
   users: ConfigurationBase['users'],
   lid: string,
   configuration: ReserveTimesConfiguration,
-) {
-  const { url, urlTime, urlBook, debug } = configuration;
+): Promise<void> {
+  const { url, urlTime, urlBook, debug, dryRun, webhook, cleanup } =
+    configuration;
+
+  webhook.log(dryRun ? 'STARTING **DRY** RUN' : 'STARTING RUN');
 
   let numberReserved = 0;
 
@@ -62,28 +72,32 @@ async function reserveTimes(
     }
     groupTimesToReserve.push(group);
 
-    if (groupTimesToReserve.length > users.length) {
-      console.log('There are not enough users to reserve the times!');
-      // return 0;
-    }
+    webhook.log(`*RESERVING ${room.name}*`);
+    // if (groupTimesToReserve.length > users.length) {
+    //   webhook.log('\nNOT ENOUGH EMAILS!\n');
+    //   break;
+    // }
 
-    console.log(`${debug ? '\n' : ''}Now reserving for ${room.name}`);
     const queue = groupTimesToReserve.slice(0);
+    const success: ReservationSlot[] = [];
 
     while (queue.length > 0) {
       const group = queue.shift()!;
-      const user = users[0]; //users.pop();
+      const user = users.pop(); //users.pop();
 
-      if (!user?.email) {
-        console.warn(
-          `Failed timeslot (${group[0].start} - ${
-            group[group.length - 1].end
-          })`,
+      // @codyduong REMOVE CONSTANT
+      // eslint-disable-next-line no-constant-condition
+      if (!user?.email && false) {
+        // webhook.ping();
+        webhook.log(
+          `${Temporal.PlainTime.from(
+            group[0].start,
+          ).toString()}-${Temporal.PlainTime.from(
+            group[group.length - 1].end,
+          ).toString()}|FAILED`,
         );
         continue;
       }
-
-      continue;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = new FormData();
@@ -124,38 +138,110 @@ async function reserveTimes(
 
       const document = dom.window._document as Document;
 
-      const session = document.getElementById('session')!.getAttribute('value');
-
-      console.log(
-        `Locked timeslot (${group[0].start} - ${
-          group[group.length - 1].end
-        }), id: ${session}`,
+      const session = Number(
+        document.getElementById('session')?.getAttribute('value'),
       );
 
-      // submit our reservation
+      cleanup.addSession(session);
+
+      webhook.log(
+        `${Temporal.PlainTime.from(
+          group[0].start,
+        ).toString()}-${Temporal.PlainTime.from(
+          group[group.length - 1].end,
+        ).toString()}|${session}`,
+      );
+
+      if (dryRun) {
+        webhook.log('#dry_runFoobar');
+        success.push(...group);
+        continue;
+      }
+
+      if (Number.isNaN(session)) {
+        throw Error(`Failed to get session for ${room.name}`);
+      }
+
+      // get return url
+      const returnUrl = (() => {
+        const newUrl = new URL(url);
+        const newParams = new URLSearchParams([
+          ['lid', lid],
+          ['gid', newUrl.searchParams.get('gid')!],
+          ['zone', newUrl.searchParams.get('zone')!],
+          ['space', newUrl.searchParams.get('space')!],
+          ['capacity', newUrl.searchParams.get('capacity')!],
+        ]);
+        return newUrl.pathname.replace('/availability', '') + '?' + newParams;
+      })();
+
+      const body2 = new FormData();
+
+      body2.append('session', `${session}`);
+      body2.append('fname', user.fname);
+      body2.append('lname', user.lname);
+      body2.append('email', user.email);
+      body2.append(
+        'bookings',
+        JSON.stringify(
+          group.map((g) => ({
+            lid: Number(lid),
+            eid: Number(g.eid),
+            seat_id: Number(g['seat_id']),
+            start: g.start,
+            end: g.end,
+            checksum: g.checksum,
+          })),
+        ),
+      );
+      body2.append('returnUrl', returnUrl);
+      body2.append('method', '14');
+
+      const response2 = await fetch(urlBook, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          'Accept-Language': 'en-US,en;q=0.7',
+          'Accept-Encoding': 'gzip, deflate, br',
+          // 'Content-Type': `multipart/form-data; boundary=${divider}`,
+          referer: url,
+        },
+        body: body2,
+      });
 
       // handle failed session just in case our user already reserved today, and we still want to reserve this timeslot!
       if (
-        response.status === 500 &&
-        (await response.text()).includes(
+        response2.status === 500 &&
+        (await response2.text()).includes(
           'Sorry, this exceeds the 120 minute per day limit across all locations.',
         )
       ) {
         queue.push(group);
         continue;
       }
+
+      // handle unexpected error codes
+      if (response2.status !== 200) {
+        throw Error(`Unhandled status: ${response2.status}`);
+      }
+
+      const response2json = await response2.json();
+
+      webhook.log(`#${response2json.bookId}`);
+
+      success.push(...group);
     }
 
+    // print out the successfully reserved slots
+    webhook.log(displaySlots(success, true));
+
+    webhook.log('\n');
     numberReserved += 1;
   }
 
-  // Use our session to submit
-
   if (numberReserved == 0) {
-    console.log('Failed to reserve any rooms! What happened???');
+    webhook.log('Failed to reserve any rooms! What happened???\n');
   }
-
-  return 0;
 }
 
 export default reserveTimes;
