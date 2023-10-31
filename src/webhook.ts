@@ -66,6 +66,15 @@ class Webhook {
     this.#ping.length > 0 &&
       this.#send(this.#ping.reduce((prev, curr) => prev + `<@${curr}>`, ''));
   }
+
+  dump(): string {
+    const temp = this.#messages;
+    this.#messages = {};
+    return Object.values(temp).reduce(
+      (messages, message) => `${messages}\n${message}`,
+      '',
+    );
+  }
 }
 
 export default Webhook;
