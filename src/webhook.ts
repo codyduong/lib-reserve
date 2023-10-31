@@ -57,9 +57,9 @@ class Webhook {
     }
   }
 
-  log(message?: any, optionalParams?: any[]): void {
+  log(message?: any, _?: any[]): void {
     this.#send(message);
-    console.log(message, optionalParams);
+    console.log(message);
   }
 
   ping(): void {
