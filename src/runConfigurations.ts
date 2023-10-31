@@ -15,6 +15,10 @@ async function runConfigurations(
   for (const run of runs) {
     const { url } = run;
 
+    if (run.disabled) {
+      continue;
+    }
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -57,10 +61,18 @@ async function runConfigurations(
       }
 
       const fieldset = room.getElementsByTagName('fieldset')[0];
+      const description =
+        room.getElementsByClassName('panel-body')[0].textContent;
       const name = fieldset
         .getElementsByTagName('legend')[0]
         .textContent!.trim();
-      const [score, times] = getScore(fieldset, capacity, webhook, run);
+      const [score, times] = getScore(
+        fieldset,
+        capacity,
+        description ?? '',
+        webhook,
+        run,
+      );
 
       if (score == 0) {
         // Strip out location name
@@ -98,6 +110,7 @@ async function runConfigurations(
       dryRun: run.dryRun,
       webhook,
       cleanup,
+      amount: run.amount,
     });
   }
 }

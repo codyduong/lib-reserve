@@ -20,6 +20,7 @@ export type ReserveTimesConfiguration = {
   urlBook: string;
   webhook: Webhook;
   cleanup: Cleanup;
+  amount: number;
 };
 
 // naively assume sorted
@@ -29,8 +30,16 @@ async function reserveTimes(
   lid: string,
   configuration: ReserveTimesConfiguration,
 ): Promise<void> {
-  const { url, urlTime, urlBook, debug, dryRun, webhook, cleanup } =
-    configuration;
+  const {
+    url,
+    urlTime,
+    urlBook,
+    debug,
+    dryRun,
+    webhook,
+    cleanup,
+    amount: maxToReserve,
+  } = configuration;
 
   webhook.log(dryRun ? 'STARTING **DRY** RUN' : 'STARTING RUN');
 
@@ -41,17 +50,13 @@ async function reserveTimes(
       continue;
     }
 
-    if (numberReserved >= 1) {
-      break;
-    }
-
     // if (room.score <= 0 && discardZero) {
     //   continue;
     // }
 
-    // if (numberReserved >= maxToReserve) {
-    //   break;
-    // }
+    if (numberReserved >= maxToReserve) {
+      break;
+    }
 
     const groupTimesToReserve: ReservationSlot[][] = [];
     let group: ReservationSlot[] = [];
@@ -144,7 +149,7 @@ async function reserveTimes(
       }
 
       if (dryRun) {
-        webhook.log('#dry_runFoobar');
+        webhook.log(`#dry_runFoobar|${user?.email}`);
         success.push(...group);
         continue;
       }
@@ -218,7 +223,7 @@ async function reserveTimes(
 
       const response2json = await response2.json();
 
-      webhook.log(`#${response2json.bookId}`);
+      webhook.log(`#${response2json.bookId}|${user.email}`);
 
       success.push(...group);
     }
@@ -228,6 +233,12 @@ async function reserveTimes(
 
     webhook.log('\n');
     numberReserved += 1;
+  }
+
+  if (numberReserved < maxToReserve) {
+    webhook.log(
+      `Only reserved ${numberReserved} out of ${maxToReserve} requsted. Was there enough valid rooms?`,
+    );
   }
 
   if (numberReserved == 0) {

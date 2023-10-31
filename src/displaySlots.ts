@@ -3,10 +3,17 @@ import type { ReservationSlot } from './getScore';
 export function displaySlots(slots: ReservationSlot[], flip = false): string {
   let availability = '';
   for (let i = 0; i < 48; i++) {
-    if (slots.findIndex((slot) => slot.time == i) != -1) {
-      availability += flip ? '▮' : '▯';
+    const findIndex = slots.findIndex((slot) => slot.time == i);
+    if (findIndex != -1) {
+      // available
+      if (slots[findIndex].blacklist) {
+        availability += '◈';
+        continue;
+      }
+      availability += flip ? '◆' : '◇';
     } else {
-      availability += flip ? '▯' : '▮';
+      // unavailable
+      availability += flip ? '◇' : '◆';
     }
   }
   return availability;

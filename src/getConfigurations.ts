@@ -1,6 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 
 export type RunConfiguration = {
+  $comment?: string;
   /**
    * @default https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0
    * @TJS-format uri3
@@ -8,14 +9,13 @@ export type RunConfiguration = {
   url?: string;
   debug?: boolean;
   dryRun?: boolean;
-  /**
-   * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-   * @items.type integer
-   * @items.minimum 0
-   * @items.maximum 47
-   */
-  requiredTimes?: number[];
+  disabled?: boolean;
   blacklist?: string[];
+  /**
+   * @minimum 0
+   * @default 1
+   */
+  amount?: number;
   continuity?: {
     base?: number;
     /**
@@ -50,9 +50,36 @@ export type RunConfiguration = {
      */
     max?: number;
   };
+  times?: {
+    /**
+     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+     * @items.type integer
+     * @items.minimum 0
+     * @items.maximum 47
+     */
+    required?: number[];
+    /**
+     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+     * @items.type integer
+     * @items.minimum 0
+     * @items.maximum 47
+     */
+    blacklist?: number[];
+    /**
+     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+     * @items.type integer
+     * @items.minimum 0
+     * @items.maximum 47
+     */
+    whitelist?: number[];
+  };
 };
 
 export type ConfigurationBase = {
+  /**
+   * @default ./schema.json
+   */
+  $schema: string;
   /**
    * @default https://calendar.lib.ku.edu/ajax/space/times
    * @TJS-format uri
@@ -98,10 +125,12 @@ export type Run = {
   url: string;
   urlTime: string;
   urlBook: string;
-  requiredTimes: number[];
+  times: Required<NonNullable<RunConfiguration['times']>>;
   continuity: RunConfiguration['continuity'];
   capacity: RunConfiguration['capacity'];
   blacklist: string[];
+  disabled: boolean;
+  amount: number;
 };
 
 export type Runs = Run[];
@@ -144,9 +173,17 @@ async function getConfiguration(
         urlBook: configuration.urlBook,
         debug: configuration.debug ?? false,
         dryRun: configuration.dryRun ?? false,
+        disabled: false,
         ...room,
         url: `${url}&date=${dateString}`,
-        requiredTimes: room.requiredTimes ?? configuration.requiredTimes ?? [],
+        times: {
+          required:
+            room.times?.required ?? configuration?.times?.required ?? [],
+          blacklist:
+            room.times?.blacklist ?? configuration?.times?.blacklist ?? [],
+          whitelist:
+            room.times?.whitelist ?? configuration?.times?.whitelist ?? [],
+        },
         continuity: {
           ...configuration.continuity,
           ...room.continuity,
@@ -156,6 +193,7 @@ async function getConfiguration(
           ...room.capacity,
         },
         blacklist: room.blacklist ?? configuration.blacklist ?? [],
+        amount: room.amount ?? configuration.amount ?? 1,
       });
     });
   } else {
@@ -170,10 +208,17 @@ async function getConfiguration(
       urlBook: configuration.urlBook,
       debug: configuration.debug ?? false,
       dryRun: configuration.dryRun ?? false,
-      requiredTimes: configuration.requiredTimes ?? [],
+      times: {
+        required: [],
+        blacklist: [],
+        whitelist: [],
+        ...configuration.times,
+      },
       continuity: configuration.continuity,
       capacity: configuration.capacity,
       blacklist: configuration.blacklist ?? [],
+      disabled: configuration.disabled ?? false,
+      amount: configuration.amount ?? 1,
     });
   }
 

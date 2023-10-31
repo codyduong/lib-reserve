@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --o schema.json"
+    "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --noExtraProps --defaultProps --o schema.json"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.4",

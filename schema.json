@@ -1,209 +1,306 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "allOf": [
-        {
+    "additionalProperties": false,
+    "properties": {
+        "$comment": {
+            "type": "string"
+        },
+        "$schema": {
+            "default": "./schema.json",
+            "type": "string"
+        },
+        "amount": {
+            "default": 1,
+            "minimum": 0,
+            "type": "number"
+        },
+        "blacklist": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "capacity": {
+            "additionalProperties": false,
+            "defaultProperties": [],
             "properties": {
-                "days": {
-                    "default": 7,
-                    "description": "Days to reserve in the future",
+                "base": {
+                    "type": "number"
+                },
+                "max": {
+                    "default": 0,
+                    "format": "integer",
                     "minimum": 0,
                     "type": "number"
                 },
-                "rooms": {
-                    "items": {
-                        "properties": {
-                            "blacklist": {
-                                "items": {
-                                    "type": "string"
-                                },
-                                "type": "array"
-                            },
-                            "capacity": {
-                                "properties": {
-                                    "base": {
-                                        "type": "number"
-                                    },
-                                    "max": {
-                                        "default": 0,
-                                        "format": "integer",
-                                        "minimum": 0,
-                                        "type": "number"
-                                    },
-                                    "min": {
-                                        "default": 0,
-                                        "format": "integer",
-                                        "minimum": 0,
-                                        "type": "number"
-                                    }
-                                },
-                                "type": "object"
-                            },
-                            "continuity": {
-                                "properties": {
-                                    "base": {
-                                        "type": "number"
-                                    },
-                                    "max": {
-                                        "default": 0,
-                                        "minimum": 0,
-                                        "type": "number"
-                                    },
-                                    "min": {
-                                        "default": 0,
-                                        "minimum": 0,
-                                        "type": "number"
-                                    },
-                                    "multiplerMax": {
-                                        "default": 8,
-                                        "format": "integer",
-                                        "minimum": 0,
-                                        "type": "number"
-                                    }
-                                },
-                                "type": "object"
-                            },
-                            "debug": {
-                                "type": "boolean"
-                            },
-                            "dryRun": {
-                                "type": "boolean"
-                            },
-                            "requiredTimes": {
-                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "items": {
-                                    "type": "number"
-                                },
-                                "type": "array"
-                            },
-                            "url": {
-                                "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
-                                "format": "uri3",
-                                "type": "string"
-                            }
-                        },
-                        "type": "object"
-                    },
-                    "type": "array"
-                },
-                "urlBook": {
-                    "default": "https://calendar.lib.ku.edu/ajax/space/book",
-                    "format": "uri",
-                    "type": "string"
-                },
-                "urlTime": {
-                    "default": "https://calendar.lib.ku.edu/ajax/space/times",
-                    "format": "uri",
-                    "type": "string"
-                },
-                "users": {
-                    "items": {
-                        "properties": {
-                            "email": {
-                                "description": "Must end in respective .edu ending, ie. ku.edu for ku libraries",
-                                "format": "email",
-                                "type": "string"
-                            },
-                            "fname": {
-                                "type": "string"
-                            },
-                            "lname": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "email",
-                            "fname",
-                            "lname"
-                        ],
-                        "type": "object"
-                    },
-                    "type": "array"
-                },
-                "webhook": {
-                    "format": "uri",
-                    "type": "string"
+                "min": {
+                    "default": 0,
+                    "format": "integer",
+                    "minimum": 0,
+                    "type": "number"
                 }
             },
-            "required": [
-                "urlBook",
-                "urlTime",
-                "users"
-            ],
             "type": "object"
         },
-        {
+        "continuity": {
+            "additionalProperties": false,
+            "defaultProperties": [],
             "properties": {
-                "blacklist": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                "base": {
+                    "type": "number"
                 },
-                "capacity": {
-                    "properties": {
-                        "base": {
-                            "type": "number"
-                        },
-                        "max": {
-                            "default": 0,
-                            "format": "integer",
-                            "minimum": 0,
-                            "type": "number"
-                        },
-                        "min": {
-                            "default": 0,
-                            "format": "integer",
-                            "minimum": 0,
-                            "type": "number"
-                        }
-                    },
-                    "type": "object"
+                "max": {
+                    "default": 0,
+                    "minimum": 0,
+                    "type": "number"
                 },
-                "continuity": {
-                    "properties": {
-                        "base": {
-                            "type": "number"
-                        },
-                        "max": {
-                            "default": 0,
-                            "minimum": 0,
-                            "type": "number"
-                        },
-                        "min": {
-                            "default": 0,
-                            "minimum": 0,
-                            "type": "number"
-                        },
-                        "multiplerMax": {
-                            "default": 8,
-                            "format": "integer",
-                            "minimum": 0,
-                            "type": "number"
-                        }
-                    },
-                    "type": "object"
+                "min": {
+                    "default": 0,
+                    "minimum": 0,
+                    "type": "number"
                 },
-                "debug": {
-                    "type": "boolean"
-                },
-                "dryRun": {
-                    "type": "boolean"
-                },
-                "requiredTimes": {
-                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "items": {
-                        "type": "number"
-                    },
-                    "type": "array"
-                },
-                "url": {
-                    "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
-                    "format": "uri3",
-                    "type": "string"
+                "multiplerMax": {
+                    "default": 8,
+                    "format": "integer",
+                    "minimum": 0,
+                    "type": "number"
                 }
             },
             "type": "object"
+        },
+        "days": {
+            "default": 7,
+            "description": "Days to reserve in the future",
+            "minimum": 0,
+            "type": "number"
+        },
+        "debug": {
+            "type": "boolean"
+        },
+        "disabled": {
+            "type": "boolean"
+        },
+        "dryRun": {
+            "type": "boolean"
+        },
+        "ping": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "rooms": {
+            "items": {
+                "additionalProperties": false,
+                "defaultProperties": [],
+                "properties": {
+                    "$comment": {
+                        "type": "string"
+                    },
+                    "amount": {
+                        "default": 1,
+                        "minimum": 0,
+                        "type": "number"
+                    },
+                    "blacklist": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "capacity": {
+                        "additionalProperties": false,
+                        "defaultProperties": [],
+                        "properties": {
+                            "base": {
+                                "type": "number"
+                            },
+                            "max": {
+                                "default": 0,
+                                "format": "integer",
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "min": {
+                                "default": 0,
+                                "format": "integer",
+                                "minimum": 0,
+                                "type": "number"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "continuity": {
+                        "additionalProperties": false,
+                        "defaultProperties": [],
+                        "properties": {
+                            "base": {
+                                "type": "number"
+                            },
+                            "max": {
+                                "default": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "min": {
+                                "default": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "multiplerMax": {
+                                "default": 8,
+                                "format": "integer",
+                                "minimum": 0,
+                                "type": "number"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "debug": {
+                        "type": "boolean"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "dryRun": {
+                        "type": "boolean"
+                    },
+                    "times": {
+                        "additionalProperties": false,
+                        "defaultProperties": [],
+                        "properties": {
+                            "blacklist": {
+                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                "items": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                },
+                                "type": "array"
+                            },
+                            "required": {
+                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                "items": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                },
+                                "type": "array"
+                            },
+                            "whitelist": {
+                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                "items": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                },
+                                "type": "array"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "url": {
+                        "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
+                        "format": "uri3",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "times": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "blacklist": {
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 47
+                    },
+                    "type": "array"
+                },
+                "required": {
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 47
+                    },
+                    "type": "array"
+                },
+                "whitelist": {
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 47
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "url": {
+            "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
+            "format": "uri3",
+            "type": "string"
+        },
+        "urlBook": {
+            "default": "https://calendar.lib.ku.edu/ajax/space/book",
+            "format": "uri",
+            "type": "string"
+        },
+        "urlEnd": {
+            "default": "https://calendar.lib.ku.edu/ajax/space/session/end",
+            "format": "uri",
+            "type": "string"
+        },
+        "urlTime": {
+            "default": "https://calendar.lib.ku.edu/ajax/space/times",
+            "format": "uri",
+            "type": "string"
+        },
+        "users": {
+            "items": {
+                "additionalProperties": false,
+                "defaultProperties": [],
+                "properties": {
+                    "email": {
+                        "description": "Must end in respective .edu ending, ie. ku.edu for ku libraries",
+                        "format": "email",
+                        "type": "string"
+                    },
+                    "fname": {
+                        "type": "string"
+                    },
+                    "lname": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "fname",
+                    "lname"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "webhook": {
+            "format": "uri",
+            "type": "string"
         }
-    ]
+    },
+    "required": [
+        "$schema",
+        "urlBook",
+        "urlEnd",
+        "urlTime",
+        "users"
+    ],
+    "type": "object"
 }
 

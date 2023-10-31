@@ -10,6 +10,7 @@ export type ReservationSlot = {
   start: string;
   end: string;
   seat_id: string;
+  blacklist?: boolean;
 };
 
 export type GetScoreConfiguration = Run;
@@ -17,6 +18,7 @@ export type GetScoreConfiguration = Run;
 function getScore(
   fieldset: HTMLFieldSetElement,
   capacity: number,
+  description: string,
   webhook: Webhook,
   configuration: GetScoreConfiguration | undefined,
 ): [number, ReservationSlot[]] {
@@ -24,7 +26,7 @@ function getScore(
     continuity = {},
     capacity: capacityConfiguration = {},
     debug,
-    requiredTimes,
+    times,
     blacklist,
   } = configuration ?? {};
 
@@ -74,7 +76,7 @@ function getScore(
     comboEnd = end;
     const startTime = calculateTime(start);
 
-    const continuityScore =
+    let continuityScore =
       continuityBase *
       Math.min(continuityMultiplierMax, combo) *
       (typeof continuityMultiplier == 'number'
@@ -86,6 +88,17 @@ function getScore(
           }));
 
     const input = checkbox.getElementsByTagName('input')[0];
+
+    const blacklisted =
+      times?.blacklist?.includes(startTime) ||
+      (times &&
+        (times.whitelist?.length ?? 0) > 0 &&
+        !times.whitelist.includes(startTime));
+
+    if (blacklisted) {
+      continuityScore = 0;
+    }
+
     timeSlots.push({
       time: startTime,
       checksum: input.getAttribute('data-crc')!,
@@ -93,11 +106,30 @@ function getScore(
       start: input.getAttribute('data-start')!,
       end: input.getAttribute('data-end')!,
       seat_id: input.getAttribute('data-seat')!,
+      blacklist: blacklisted,
     });
+
     score += continuityScore;
   }
 
+  // disregard if description contains phrases which are bad BOO
+  if (
+    description.includes('unavailable') ||
+    description.includes('maintenance')
+  ) {
+    score = 0;
+  }
+
   // disregard if we don't have required times
+  if (
+    times?.required &&
+    (times.required.length ?? 0) > 0 &&
+    !times.required.every((time) =>
+      timeSlots.some((slot) => slot.time === time),
+    )
+  ) {
+    score = 0;
+  }
 
   // disregard if blacklisted
   if (
@@ -127,7 +159,15 @@ function getScore(
     }
   }
 
-  return [score, timeSlots];
+  const filtered =
+    // prioritize blacklist
+    times && times.blacklist.length > 0
+      ? timeSlots.filter((time) => !times.blacklist.includes(time.time))
+      : times && times.whitelist.length > 0
+      ? timeSlots.filter((time) => times.whitelist.includes(time.time))
+      : timeSlots;
+
+  return [score, filtered];
 }
 
 export default getScore;
