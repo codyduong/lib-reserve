@@ -9,7 +9,7 @@ I make no gurantees made about the functionality of the program for any person(s
 A CLI or server (TODO better) which reserves library rooms at the University of Kansas. 
 It may similarly work on other systems powered by the same [Springshare](https://www.springshare.com/) system.
 
-It has a highly configurable input system. See [### Configuration](#configuration). Built 
+It has a highly configurable input system. See [Configuration](#configuration) 
 
 ## Installation and Usage
 
@@ -82,7 +82,7 @@ View the full [`./schema`](./schema.json).
 
 ### Setting Up
 The code can be dockerized according to the [`Dockerfile`](./Dockerfile) and can run as a server or as a script. 
-Read more in [## Technical Details](#technical-details).
+Read more in [Technical Details](#technical-details).
 
 ## Technical Details
 
