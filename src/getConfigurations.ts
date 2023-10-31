@@ -139,10 +139,14 @@ export type Configurations = [ConfigurationBase, Runs, Temporal.PlainDate];
 
 async function getConfiguration(
   configuration_location: string | URL,
+  options: {
+    dry: boolean;
+  },
 ): Promise<Configurations> {
   const configuration = JSON.parse(
     await Bun.file(configuration_location, { type: 'application/json' }).text(),
   ) as ConfigurationBase;
+  const { dry } = options;
 
   // Catch any configuration errors, either expect the url specified at the base or in every room configuration
   if (!configuration.url && !configuration.rooms?.every((room) => room.url)) {
@@ -172,7 +176,6 @@ async function getConfiguration(
         urlTime: configuration.urlTime,
         urlBook: configuration.urlBook,
         debug: configuration.debug ?? false,
-        dryRun: configuration.dryRun ?? false,
         disabled: false,
         ...room,
         url: `${url}&date=${dateString}`,
@@ -194,6 +197,7 @@ async function getConfiguration(
         },
         blacklist: room.blacklist ?? configuration.blacklist ?? [],
         amount: room.amount ?? configuration.amount ?? 1,
+        dryRun: dry ?? room.dryRun ?? configuration.dryRun ?? false,
       });
     });
   } else {
@@ -207,7 +211,7 @@ async function getConfiguration(
       urlTime: configuration.urlTime,
       urlBook: configuration.urlBook,
       debug: configuration.debug ?? false,
-      dryRun: configuration.dryRun ?? false,
+      dryRun: dry ?? configuration.dryRun ?? false,
       times: {
         required: [],
         blacklist: [],

@@ -6,7 +6,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --noExtraProps --defaultProps --o schema.json"
+    "reserve:dry": "bun ./src/index.ts --dry",
+    "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --noExtraProps --defaultProps --o schema.json",
+    "build": "bun ./scripts/deploy.ts",
+    "build:build": "bun ./scripts/deploy.ts --build",
+    "build:deploy": "bun ./scripts/deploy.ts --deploy"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.4",
@@ -23,6 +27,7 @@
   "peerDependencies": {},
   "dependencies": {
     "@js-temporal/polyfill": "^0.4.4",
+    "commander": "^11.1.0",
     "jsdom": "^22.1.0"
   }
 }
