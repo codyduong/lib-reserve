@@ -37,6 +37,7 @@ if (process.env['PORT']) {
   const server = Bun.serve({
     port: 3000,
     async fetch(_) {
+      // we should actually process args if we are running a server
       await reserve();
       return new Response(webhook.dump());
     },

@@ -8,13 +8,8 @@
     {
       "fname": "Cody",
       "lname": "Duong",
-      "email": "cody.duong@ku.edu"
+      "email": "email@ku.edu"
     },
-    {
-      "fname": "Cody",
-      "lname": "Duong",
-      "email": "c766d913@ku.edu"
-    }
   ],
   "debug": true,
   "dryRun": true,
@@ -138,6 +133,8 @@
     }
   ],
   "webhook": "https://discord.com/api/webhooks/{webhook.id}/{webhook.token}",
-  "ping": ["{discordid}"],
+  "ping": [
+    "{discordid}"
+  ],
   "days": 7
 }

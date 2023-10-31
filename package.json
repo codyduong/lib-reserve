@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "reserve": "bun ./src/index.ts",
     "reserve:dry": "bun ./src/index.ts --dry",
     "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --noExtraProps --defaultProps --o schema.json",
     "build": "bun ./scripts/deploy.ts",
