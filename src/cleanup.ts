@@ -19,6 +19,10 @@ class Cleanup {
     this.#sessions.push(session);
   }
 
+  removeSession(session: number) {
+    this.#sessions = this.#sessions.filter((s) => s == session);
+  }
+
   async cleanup() {
     if (!this.#loaded) {
       throw Error(

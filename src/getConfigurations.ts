@@ -1,4 +1,8 @@
 import { Temporal } from '@js-temporal/polyfill';
+import {
+  parseTimeConfiguration,
+  parseTimeSingular,
+} from './parseTimeConfiguration';
 
 export type RunConfiguration = {
   $comment?: string;
@@ -53,25 +57,16 @@ export type RunConfiguration = {
   times?: {
     /**
      * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     * @items.type integer
-     * @items.minimum 0
-     * @items.maximum 47
      */
-    required?: number[];
+    required?: number[] | `${number}-${number}` | `${number}` | number;
     /**
      * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     * @items.type integer
-     * @items.minimum 0
-     * @items.maximum 47
      */
-    blacklist?: number[];
+    blacklist?: number[] | `${number}-${number}` | `${number}` | number;
     /**
      * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     * @items.type integer
-     * @items.minimum 0
-     * @items.maximum 47
      */
-    whitelist?: number[];
+    whitelist?: number[] | `${number}-${number}` | `${number}` | number;
   };
 };
 
@@ -108,14 +103,14 @@ export type ConfigurationBase = {
   /**
    * @TJS-format uri
    */
-  webhook?: string;
-  ping?: string[];
+  webhook?: string | null;
+  ping?: string[] | null;
   /**
    * Days to reserve in the future
    * @default 7
    * @minimum 0
    */
-  days?: number;
+  days?: number | null;
 } & RunConfiguration;
 
 export type Run = {
@@ -125,7 +120,11 @@ export type Run = {
   url: string;
   urlTime: string;
   urlBook: string;
-  times: Required<NonNullable<RunConfiguration['times']>>;
+  times: {
+    required: number[];
+    blacklist: number[];
+    whitelist: number[];
+  };
   continuity: RunConfiguration['continuity'];
   capacity: RunConfiguration['capacity'];
   blacklist: string[];
@@ -138,15 +137,22 @@ export type Runs = Run[];
 export type Configurations = [ConfigurationBase, Runs, Temporal.PlainDate];
 
 async function getConfiguration(
-  configuration_location: string | URL,
   options: {
     dry: boolean;
+    filepath: string | URL;
   },
+  override?: ConfigurationBase,
 ): Promise<Configurations> {
-  const configuration = JSON.parse(
+  const { dry, filepath: configuration_location } = options;
+  const configurationBase = JSON.parse(
     await Bun.file(configuration_location, { type: 'application/json' }).text(),
   ) as ConfigurationBase;
-  const { dry } = options;
+
+  const configuration = {
+    // Note the shallow merge
+    ...configurationBase,
+    ...override,
+  };
 
   // Catch any configuration errors, either expect the url specified at the base or in every room configuration
   if (!configuration.url && !configuration.rooms?.every((room) => room.url)) {
@@ -162,9 +168,10 @@ async function getConfiguration(
   const dateString = date.toString();
 
   const runs: Runs = [];
+  const rooms = override?.rooms ?? configuration.rooms;
 
-  if (configuration.rooms && configuration.rooms.length > 0) {
-    configuration.rooms.forEach((room) => {
+  if (rooms && rooms.length > 0) {
+    rooms.forEach((room) => {
       const url = room.url ?? configuration.url!;
 
       const lid = new URLSearchParams(configuration.url).get(
@@ -176,16 +183,22 @@ async function getConfiguration(
         urlTime: configuration.urlTime,
         urlBook: configuration.urlBook,
         debug: configuration.debug ?? false,
-        disabled: false,
+        disabled: configuration.disabled ?? false,
         ...room,
         url: `${url}&date=${dateString}`,
         times: {
           required:
-            room.times?.required ?? configuration?.times?.required ?? [],
+            parseTimeSingular(room.times?.required) ??
+            parseTimeSingular(configuration?.times?.required) ??
+            [],
           blacklist:
-            room.times?.blacklist ?? configuration?.times?.blacklist ?? [],
+            parseTimeSingular(room.times?.blacklist) ??
+            parseTimeSingular(configuration?.times?.blacklist) ??
+            [],
           whitelist:
-            room.times?.whitelist ?? configuration?.times?.whitelist ?? [],
+            parseTimeSingular(room.times?.whitelist) ??
+            parseTimeSingular(configuration?.times?.whitelist) ??
+            [],
         },
         continuity: {
           ...configuration.continuity,
@@ -216,7 +229,7 @@ async function getConfiguration(
         required: [],
         blacklist: [],
         whitelist: [],
-        ...configuration.times,
+        ...parseTimeConfiguration(configuration.times),
       },
       continuity: configuration.continuity,
       capacity: configuration.capacity,

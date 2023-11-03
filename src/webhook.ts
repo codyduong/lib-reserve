@@ -20,7 +20,7 @@ class Webhook {
 
   loadConfiguration(...configurations: Configurations): void {
     const [configuration, _, date] = configurations;
-    this.#webhookURI = configuration.webhook;
+    this.#webhookURI = configuration.webhook ?? undefined;
     this.#date = date;
     configuration.dryRun && (this.#dryRun = configuration.dryRun);
     this.#ping = configuration.ping ?? [];

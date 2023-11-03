@@ -72,7 +72,10 @@
             "default": 7,
             "description": "Days to reserve in the future",
             "minimum": 0,
-            "type": "number"
+            "type": [
+                "null",
+                "number"
+            ]
         },
         "debug": {
             "type": "boolean"
@@ -84,10 +87,17 @@
             "type": "boolean"
         },
         "ping": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
+            "anyOf": [
+                {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                {
+                    "type": "null"
+                }
+            ]
         },
         "rooms": {
             "items": {
@@ -171,30 +181,69 @@
                         "properties": {
                             "blacklist": {
                                 "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "items": {
-                                    "type": "integer",
-                                    "minimum": 0,
-                                    "maximum": 47
-                                },
-                                "type": "array"
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                    },
+                                    {
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 47
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    }
+                                ]
                             },
                             "required": {
                                 "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "items": {
-                                    "type": "integer",
-                                    "minimum": 0,
-                                    "maximum": 47
-                                },
-                                "type": "array"
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                    },
+                                    {
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 47
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    }
+                                ]
                             },
                             "whitelist": {
                                 "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "items": {
-                                    "type": "integer",
-                                    "minimum": 0,
-                                    "maximum": 47
-                                },
-                                "type": "array"
+                                "anyOf": [
+                                    {
+                                        "type": "string",
+                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                    },
+                                    {
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                            "maximum": 47
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    }
+                                ]
                             }
                         },
                         "type": "object"
@@ -215,30 +264,69 @@
             "properties": {
                 "blacklist": {
                     "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "items": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 47
-                    },
-                    "type": "array"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ]
                 },
                 "required": {
                     "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "items": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 47
-                    },
-                    "type": "array"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ]
                 },
                 "whitelist": {
                     "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "items": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 47
-                    },
-                    "type": "array"
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ]
                 }
             },
             "type": "object"
@@ -291,7 +379,10 @@
         },
         "webhook": {
             "format": "uri",
-            "type": "string"
+            "type": [
+                "null",
+                "string"
+            ]
         }
     },
     "required": [

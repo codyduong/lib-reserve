@@ -225,6 +225,9 @@ async function reserveTimes(
 
       webhook.log(`#${response2json.bookId}|${user.email}`);
 
+      // remove session from cleanup if we booked the session
+      cleanup.removeSession(session);
+
       success.push(...group);
     }
 

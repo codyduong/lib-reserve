@@ -1,24 +1,28 @@
 import Cleanup from './cleanup';
-import getConfiguration from './getConfigurations';
+import getConfiguration, { ConfigurationBase } from './getConfigurations';
 import runConfigurations from './runConfigurations';
 import Webhook from './webhook';
 import { program } from 'commander';
 
 program.option('-d, --dry', 'Enable dry run');
+program.option(
+  '-c, --configuration <filepath>',
+  'Specify configuration file location',
+  './configuration.json',
+);
 
 program.parse(Bun.argv);
 
-const options = program.opts<{ dry: boolean }>();
+const options = program.opts<{ dry: boolean; filepath: string }>();
 
 const webhook = new Webhook();
 const cleanup = new Cleanup();
 
-const reserve = async (): Promise<void> => {
+async function reserve(override: ConfigurationBase): Promise<Response>;
+async function reserve(override?: undefined): Promise<void>;
+async function reserve(override?: ConfigurationBase): Promise<Response | void> {
   try {
-    const configurations = await getConfiguration(
-      'configuration.json',
-      options,
-    );
+    const configurations = await getConfiguration(options, override);
     webhook.loadConfiguration(...configurations);
     cleanup.loadConfigurations(...configurations);
     await runConfigurations(webhook, cleanup, ...configurations);
@@ -31,15 +35,31 @@ const reserve = async (): Promise<void> => {
     await cleanup.cleanup();
     await webhook.send();
   }
-};
+  if (override !== undefined) {
+    return new Response(webhook.dump());
+  }
+}
 
 if (process.env['PORT']) {
-  const server = Bun.serve({
+  Bun.serve({
     port: 3000,
-    async fetch(_) {
-      // we should actually process args if we are running a server
-      await reserve();
-      return new Response(webhook.dump());
+    async fetch(req) {
+      try {
+        if (req.method == 'POST') {
+          const configuration = req.body ? await req.json() : {};
+          return await reserve(configuration);
+        } else {
+          return new Response(undefined, {
+            status: 405,
+          });
+        }
+      } catch (e) {
+        // @ts-expect-error: yada
+        console.log(e?.trace);
+        return new Response('Server Error', {
+          status: 500,
+        });
+      }
     },
   });
 } else {

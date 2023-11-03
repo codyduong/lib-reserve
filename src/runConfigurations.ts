@@ -36,6 +36,18 @@ async function runConfigurations(
       's-lc-eq-checkboxes',
     ) as HTMLDivElement;
 
+    const alerts = checkboxes.getElementsByClassName('alert');
+
+    if (alerts.length > 0) {
+      const alert = alerts[0];
+      if (alert.textContent?.includes('no available timeslots')) {
+        webhook.ping();
+        throw new Error(
+          'No available timeslots available? Is the library closed or did we query a date out of reservation range?',
+        );
+      }
+    }
+
     const rooms = checkboxes.children as HTMLCollectionOf<HTMLDivElement>;
 
     // reservations are required to be adjacent, otherwise reserve in multiple attempts
