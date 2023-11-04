@@ -11,7 +11,8 @@
     "generate": "typescript-json-schema tsconfig.json ConfigurationBase --required --noExtraProps --defaultProps --o schema.json",
     "build": "bun ./scripts/deploy.ts",
     "build:build": "bun ./scripts/deploy.ts --build",
-    "build:deploy": "bun ./scripts/deploy.ts --deploy"
+    "build:deploy": "bun ./scripts/deploy.ts --deploy",
+    "lint": "bun ./scripts/lint.ts"
   },
   "devDependencies": {
     "@types/jsdom": "^21.1.4",

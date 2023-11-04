@@ -1,0 +1,36 @@
+name: Run Lint on PR or Merge to Master
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Cache bun installation
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-bun-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+
+    - name: Install bun
+      run: npm install -g bun
+
+    - name: Run Lint Script
+      run: bun run ./scripts/lint.ts
