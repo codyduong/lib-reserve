@@ -1,6 +1,141 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "additionalProperties": false,
+    "definitions": {
+        "TimeCustom": {
+            "additionalProperties": false,
+            "properties": {
+                "blacklist": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ],
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "examples": [
+                        "24-48",
+                        "24",
+                        24,
+                        [
+                            24,
+                            25,
+                            26
+                        ]
+                    ]
+                },
+                "required": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ],
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "examples": [
+                        "24-48",
+                        "24",
+                        24,
+                        [
+                            24,
+                            25,
+                            26
+                        ]
+                    ]
+                },
+                "when": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "const": "24hr",
+                            "type": "string"
+                        },
+                        {
+                            "const": "else",
+                            "type": "string"
+                        }
+                    ],
+                    "default": "24hr",
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24.\nOr a custom indicator string (\"24hr\")",
+                    "examples": [
+                        "24-48",
+                        "24",
+                        24,
+                        [
+                            24,
+                            25,
+                            26
+                        ]
+                    ]
+                },
+                "whitelist": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                        },
+                        {
+                            "items": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 47
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 47
+                        }
+                    ],
+                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                    "examples": [
+                        "24-48",
+                        "24",
+                        24,
+                        [
+                            24,
+                            25,
+                            26
+                        ]
+                    ]
+                },
+                "$comment": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
     "properties": {
         "$comment": {
             "type": "string"
@@ -175,78 +310,144 @@
                     "dryRun": {
                         "type": "boolean"
                     },
-                    "times": {
-                        "additionalProperties": false,
-                        "defaultProperties": [],
-                        "properties": {
-                            "blacklist": {
-                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "anyOf": [
-                                    {
-                                        "type": "string",
-                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                                    },
-                                    {
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 0,
-                                            "maximum": 47
-                                        },
-                                        "type": "array"
-                                    },
-                                    {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "maximum": 47
-                                    }
-                                ]
+                    "runOn": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^([1-7]-(?:[2-7]))|[1-7]$"
                             },
-                            "required": {
-                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "anyOf": [
-                                    {
-                                        "type": "string",
-                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                                    },
-                                    {
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 0,
-                                            "maximum": 47
-                                        },
-                                        "type": "array"
-                                    },
-                                    {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "maximum": 47
-                                    }
-                                ]
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 7
+                                }
                             },
-                            "whitelist": {
-                                "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                                "anyOf": [
-                                    {
-                                        "type": "string",
-                                        "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                                    },
-                                    {
-                                        "items": {
-                                            "type": "integer",
-                                            "minimum": 0,
-                                            "maximum": 47
-                                        },
-                                        "type": "array"
-                                    },
-                                    {
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "maximum": 47
-                                    }
-                                ]
+                            {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 7
                             }
-                        },
-                        "type": "object"
+                        ],
+                        "default": "0-7",
+                        "description": "ISO 8601 day number. 1 is Monday, and Sunday 7."
+                    },
+                    "times": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": false,
+                                "defaultProperties": [],
+                                "properties": {
+                                    "blacklist": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string",
+                                                "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                            },
+                                            {
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 47
+                                                },
+                                                "type": "array"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 47
+                                            }
+                                        ],
+                                        "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                        "examples": [
+                                            "24-48",
+                                            "24",
+                                            24,
+                                            [
+                                                24,
+                                                25,
+                                                26
+                                            ]
+                                        ]
+                                    },
+                                    "required": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string",
+                                                "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                            },
+                                            {
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 47
+                                                },
+                                                "type": "array"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 47
+                                            }
+                                        ],
+                                        "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                        "examples": [
+                                            "24-48",
+                                            "24",
+                                            24,
+                                            [
+                                                24,
+                                                25,
+                                                26
+                                            ]
+                                        ]
+                                    },
+                                    "whitelist": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string",
+                                                "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                            },
+                                            {
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 47
+                                                },
+                                                "type": "array"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 47
+                                            }
+                                        ],
+                                        "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                                        "examples": [
+                                            "24-48",
+                                            "24",
+                                            24,
+                                            [
+                                                24,
+                                                25,
+                                                26
+                                            ]
+                                        ]
+                                    },
+                                    "$comment": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            {
+                                "items": {
+                                    "$ref": "#/definitions/TimeCustom"
+                                },
+                                "type": "array"
+                            }
+                        ]
                     },
                     "url": {
                         "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
@@ -258,78 +459,144 @@
             },
             "type": "array"
         },
-        "times": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "blacklist": {
-                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                        },
-                        {
-                            "items": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 47
-                            },
-                            "type": "array"
-                        },
-                        {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 47
-                        }
-                    ]
+        "runOn": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "pattern": "^([1-7]-(?:[2-7]))|[1-7]$"
                 },
-                "required": {
-                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                        },
-                        {
-                            "items": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 47
-                            },
-                            "type": "array"
-                        },
-                        {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 47
-                        }
-                    ]
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 7
+                    }
                 },
-                "whitelist": {
-                    "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
-                    "anyOf": [
-                        {
-                            "type": "string",
-                            "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
-                        },
-                        {
-                            "items": {
-                                "type": "integer",
-                                "minimum": 0,
-                                "maximum": 47
-                            },
-                            "type": "array"
-                        },
-                        {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 47
-                        }
-                    ]
+                {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 7
                 }
-            },
-            "type": "object"
+            ],
+            "default": "0-7",
+            "description": "ISO 8601 day number. 1 is Monday, and Sunday 7."
+        },
+        "times": {
+            "anyOf": [
+                {
+                    "additionalProperties": false,
+                    "defaultProperties": [],
+                    "properties": {
+                        "blacklist": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                },
+                                {
+                                    "items": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    },
+                                    "type": "array"
+                                },
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                }
+                            ],
+                            "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                            "examples": [
+                                "24-48",
+                                "24",
+                                24,
+                                [
+                                    24,
+                                    25,
+                                    26
+                                ]
+                            ]
+                        },
+                        "required": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                },
+                                {
+                                    "items": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    },
+                                    "type": "array"
+                                },
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                }
+                            ],
+                            "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                            "examples": [
+                                "24-48",
+                                "24",
+                                24,
+                                [
+                                    24,
+                                    25,
+                                    26
+                                ]
+                            ]
+                        },
+                        "whitelist": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^((?:(?:[0-3][0-9])|4[0-6]|[0-9])-(?:(?:[0-3][0-9])|4[0-7]|[0-9]))|(?:[0-9]|[1-3][0-9]|4[0-7])$"
+                                },
+                                {
+                                    "items": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 47
+                                    },
+                                    "type": "array"
+                                },
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 47
+                                }
+                            ],
+                            "description": "48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24",
+                            "examples": [
+                                "24-48",
+                                "24",
+                                24,
+                                [
+                                    24,
+                                    25,
+                                    26
+                                ]
+                            ]
+                        },
+                        "$comment": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                {
+                    "items": {
+                        "$ref": "#/definitions/TimeCustom"
+                    },
+                    "type": "array"
+                }
+            ]
         },
         "url": {
             "default": "https://calendar.lib.ku.edu/r/accessible/availability?lid=17465&zone=0&gid=36998&capacity=2&space=0",
@@ -345,6 +612,43 @@
             "default": "https://calendar.lib.ku.edu/ajax/space/session/end",
             "format": "uri",
             "type": "string"
+        },
+        "urlHours": {
+            "default": "https://calendar.lib.ku.edu/widget/hours/grid?iid=647&format=json&weeks=2&systemTime=1",
+            "format": "uri",
+            "type": "string"
+        },
+        "urlHoursHeader": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "referer": {
+                    "default": "https://lib.ku.edu/",
+                    "format": "uri",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "referer"
+            ],
+            "type": "object"
+        },
+        "urlHoursInstruction": {
+            "additionalProperties": false,
+            "defaultProperties": [],
+            "properties": {
+                "lid": {
+                    "const": 19335,
+                    "default": 19335,
+                    "description": "This is the lid for the location we want the hours of. Take note that this lid is different than that of the url lid",
+                    "format": "integer",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "lid"
+            ],
+            "type": "object"
         },
         "urlTime": {
             "default": "https://calendar.lib.ku.edu/ajax/space/times",
@@ -389,6 +693,9 @@
         "$schema",
         "urlBook",
         "urlEnd",
+        "urlHours",
+        "urlHoursHeader",
+        "urlHoursInstruction",
         "urlTime",
         "users"
     ],

@@ -121,3 +121,9 @@ to verify we have reserved our timeslots.
 
 All logs are optionally linked to a webook (discord) specifically, on failure it will ping necessary users as well.
  
+<!--
+gcloud init
+https://stackoverflow.com/a/49958213/17954209
+gcloud components install docker-credential-gcr
+sudo usermod -a -G docker ${USER}
+-->

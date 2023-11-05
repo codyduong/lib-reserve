@@ -2,7 +2,36 @@ import { Temporal } from '@js-temporal/polyfill';
 import {
   parseTimeConfiguration,
   parseTimeSingular,
-} from './parseTimeConfiguration';
+} from './parseConfiguration';
+
+export type TimesValue = {
+  /**
+   * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+   * @TJS-examples ["24-48", "24", 24, [24, 25, 26]]
+   */
+  required?: number[] | `${number}-${number}` | `${number}` | number;
+  /**
+   * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+   * @TJS-examples ["24-48", "24", 24, [24, 25, 26]]
+   */
+  blacklist?: number[] | `${number}-${number}` | `${number}` | number;
+  /**
+   * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
+   * @TJS-examples ["24-48", "24", 24, [24, 25, 26]]
+   */
+  whitelist?: number[] | `${number}-${number}` | `${number}` | number;
+};
+
+export type TimeCustom = {
+  /**
+   * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24.
+   * Or a custom indicator string ("24hr")
+   * @TJS-examples ["24-48", "24", 24, [24, 25, 26]]
+   * @default "24hr"
+   */
+  when?: '24hr' | 'else' | `${number}-${number}`;
+  $comment?: string;
+} & TimesValue;
 
 export type RunConfiguration = {
   $comment?: string;
@@ -54,20 +83,12 @@ export type RunConfiguration = {
      */
     max?: number;
   };
-  times?: {
-    /**
-     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     */
-    required?: number[] | `${number}-${number}` | `${number}` | number;
-    /**
-     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     */
-    blacklist?: number[] | `${number}-${number}` | `${number}` | number;
-    /**
-     * 48 thirty minute segments of the day, indiced at 0. IE 12:00-12:30 is 24
-     */
-    whitelist?: number[] | `${number}-${number}` | `${number}` | number;
-  };
+  times?: TimesValue | TimeCustom[];
+  /**
+   * ISO 8601 day number. 1 is Monday, and Sunday 7.
+   * @default "1-7"
+   */
+  runOn?: `${number}-${number}` | number[] | number;
 };
 
 export type ConfigurationBase = {
@@ -90,6 +111,26 @@ export type ConfigurationBase = {
    * @TJS-format uri
    */
   urlBook: string;
+  /**
+   * @default https://calendar.lib.ku.edu/widget/hours/grid?iid=647&format=json&weeks=2&systemTime=1&lid=19335
+   * @TJS-format uri
+   */
+  urlHours: string;
+  urlHoursInstruction: {
+    /**
+     * This is the lid for the location we want the hours of. Take note that this lid is different than that of the url lid
+     * @default 19335
+     * @TJS-format integer
+     */
+    lid: 19335;
+  };
+  urlHoursHeader: {
+    /**
+     * @default https://lib.ku.edu/
+     * @TJS-format uri
+     */
+    referer: string;
+  };
   users: {
     fname: string;
     lname: string;
@@ -121,15 +162,17 @@ export type Run = {
   urlTime: string;
   urlBook: string;
   times: {
+    when: TimeCustom['when'];
     required: number[];
     blacklist: number[];
     whitelist: number[];
-  };
+  }[];
   continuity: RunConfiguration['continuity'];
   capacity: RunConfiguration['capacity'];
   blacklist: string[];
   disabled: boolean;
   amount: number;
+  runOn: number[];
 };
 
 export type Runs = Run[];
@@ -143,7 +186,9 @@ async function getConfiguration(
   },
   override?: ConfigurationBase,
 ): Promise<Configurations> {
-  const { dry, filepath: configuration_location } = options;
+  const { dry, filepath: configuration_location = './configuration.json' } =
+    options;
+
   const configurationBase = JSON.parse(
     await Bun.file(configuration_location, { type: 'application/json' }).text(),
   ) as ConfigurationBase;
@@ -178,28 +223,66 @@ async function getConfiguration(
         url.split('=')[0],
       )!;
 
+      const roomTimes = parseTimeConfiguration(room.times) ?? [];
+      const configTimes = parseTimeConfiguration(configuration.times) ?? [];
+
+      // merge together if 'when' key is the same
+      const mergedTimes = [...roomTimes, ...configTimes]
+        .reduce<
+          {
+            when: TimeCustom['when'];
+            required: undefined | number[];
+            whitelist: undefined | number[];
+            blacklist: undefined | number[];
+          }[]
+        >(
+          (prev, time) => {
+            const prevIndex = prev.findIndex((item) => item.when == time.when);
+            const dupl = [...prev];
+            if (prevIndex != -1) {
+              dupl[prevIndex] = {
+                when: prev[prevIndex]?.when,
+                required: prev[prevIndex]?.required ?? time.required,
+                whitelist: prev[prevIndex]?.whitelist ?? time.whitelist,
+                blacklist: prev[prevIndex]?.blacklist ?? time.blacklist,
+              };
+
+              return [
+                ...dupl.slice(0, prevIndex + 1),
+                ...dupl
+                  .slice(prevIndex + 1)
+                  .filter(({ when }) => when !== dupl[prevIndex]?.when),
+              ];
+            }
+
+            return [...dupl, time];
+          },
+          [
+            {
+              when: '24hr',
+              required: undefined,
+              whitelist: undefined,
+              blacklist: undefined,
+            },
+          ],
+        )
+        .map(({ when, required, whitelist, blacklist }) => ({
+          when: when,
+          required: required ?? [],
+          whitelist: whitelist ?? [],
+          blacklist: blacklist ?? [],
+        }));
+
       runs.push({
+        // Configuration pushdown
         lid,
         urlTime: configuration.urlTime,
         urlBook: configuration.urlBook,
-        debug: configuration.debug ?? false,
-        disabled: configuration.disabled ?? false,
-        ...room,
+        // Merged
+        debug: room?.debug ?? configuration.debug ?? false,
+        disabled: room?.disabled ?? configuration.disabled ?? false,
         url: `${url}&date=${dateString}`,
-        times: {
-          required:
-            parseTimeSingular(room.times?.required) ??
-            parseTimeSingular(configuration?.times?.required) ??
-            [],
-          blacklist:
-            parseTimeSingular(room.times?.blacklist) ??
-            parseTimeSingular(configuration?.times?.blacklist) ??
-            [],
-          whitelist:
-            parseTimeSingular(room.times?.whitelist) ??
-            parseTimeSingular(configuration?.times?.whitelist) ??
-            [],
-        },
+        times: mergedTimes,
         continuity: {
           ...configuration.continuity,
           ...room.continuity,
@@ -211,6 +294,10 @@ async function getConfiguration(
         blacklist: room.blacklist ?? configuration.blacklist ?? [],
         amount: room.amount ?? configuration.amount ?? 1,
         dryRun: dry ?? room.dryRun ?? configuration.dryRun ?? false,
+        runOn:
+          parseTimeSingular(room.runOn) ??
+          parseTimeSingular(configuration.runOn) ??
+          parseTimeSingular(`1-7`),
       });
     });
   } else {
@@ -225,17 +312,21 @@ async function getConfiguration(
       urlBook: configuration.urlBook,
       debug: configuration.debug ?? false,
       dryRun: dry ?? configuration.dryRun ?? false,
-      times: {
-        required: [],
-        blacklist: [],
-        whitelist: [],
-        ...parseTimeConfiguration(configuration.times),
-      },
+      times: [
+        {
+          when: '24hr',
+          required: [],
+          blacklist: [],
+          whitelist: [],
+          ...parseTimeConfiguration(configuration.times),
+        },
+      ],
       continuity: configuration.continuity,
       capacity: configuration.capacity,
       blacklist: configuration.blacklist ?? [],
       disabled: configuration.disabled ?? false,
       amount: configuration.amount ?? 1,
+      runOn: parseTimeSingular(configuration.runOn) ?? parseTimeSingular('1-7'),
     });
   }
 

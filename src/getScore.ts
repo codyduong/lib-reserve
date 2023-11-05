@@ -21,6 +21,8 @@ function getScore(
   description: string,
   webhook: Webhook,
   configuration: GetScoreConfiguration | undefined,
+  // check our library hours against possible configurations
+  libraryHours: '24hr' | `${number}-${number}`,
 ): [number, ReservationSlot[]] {
   const {
     continuity = {},
@@ -65,6 +67,10 @@ function getScore(
   let comboEnd: null | string = null;
   const timeSlots: ReservationSlot[] = [];
 
+  const currentTimes =
+    times?.find((time) => time.when === libraryHours) ??
+    times?.find((time) => time.when === 'else');
+
   for (const checkbox of checkboxes) {
     const [start, end] = checkbox.textContent!.trim()!.split(' - ');
     if (start == comboEnd) {
@@ -90,10 +96,10 @@ function getScore(
     const input = checkbox.getElementsByTagName('input')[0];
 
     const blacklisted =
-      times?.blacklist?.includes(startTime) ||
+      currentTimes?.blacklist.includes(startTime) ||
       (times &&
-        (times.whitelist?.length ?? 0) > 0 &&
-        !times.whitelist.includes(startTime));
+        (currentTimes?.whitelist.length ?? 0) > 0 &&
+        !currentTimes?.whitelist.includes(startTime));
 
     if (blacklisted) {
       continuityScore = 0;
@@ -122,9 +128,9 @@ function getScore(
 
   // disregard if we don't have required times
   if (
-    times?.required &&
-    (times.required.length ?? 0) > 0 &&
-    !times.required.every((time) =>
+    currentTimes?.required &&
+    (currentTimes?.required.length ?? 0) > 0 &&
+    !currentTimes?.required.every((time) =>
       timeSlots.some((slot) => slot.time === time),
     )
   ) {
@@ -136,21 +142,21 @@ function getScore(
     blacklist?.some((black) => name.includes(black)) ||
     blacklist?.includes(name)
   ) {
-    score = 0;
+    score = -1;
   }
 
+  // disregard if continuity isn't within bounds
   if (maxCombo < continuityMin || (continuityMax && maxCombo > continuityMax)) {
-    // disregard if continuity isn't within bounds
-    score = 0;
+    score = -2;
   }
 
   // disregard if capacity isn't within bounds
   if (capacity < capacityMin || (capacityMax && capacity > capacityMax)) {
-    score = 0;
+    score = -3;
   }
 
   if (debug) {
-    if (score != 0) {
+    if (score > 0) {
       webhook.log(
         `${name.replace(/^[^\d]*/g, '')}:${score.toFixed(3)}\n${displaySlots(
           timeSlots,
@@ -161,10 +167,10 @@ function getScore(
 
   const filtered =
     // prioritize blacklist
-    times && times.blacklist.length > 0
-      ? timeSlots.filter((time) => !times.blacklist.includes(time.time))
-      : times && times.whitelist.length > 0
-      ? timeSlots.filter((time) => times.whitelist.includes(time.time))
+    currentTimes && currentTimes.blacklist.length > 0
+      ? timeSlots.filter((time) => !currentTimes?.blacklist.includes(time.time))
+      : currentTimes && currentTimes.whitelist.length > 0
+      ? timeSlots.filter((time) => currentTimes?.whitelist.includes(time.time))
       : timeSlots;
 
   return [score, filtered];

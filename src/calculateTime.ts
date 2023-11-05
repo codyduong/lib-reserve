@@ -8,7 +8,7 @@ function calculateTime(
     .replace(/[^:\d]/g, '')
     .split(':')
     .map((n) => Number(n));
-  const isAM = time.includes('AM') ? true : false;
+  const isAM = time.toUpperCase().includes('AM') ? true : false;
 
   // just have a special case for 11:59
   if (time == '11:59PM') {

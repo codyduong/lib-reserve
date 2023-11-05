@@ -4,6 +4,8 @@ import getScore from './getScore';
 import reserveTimes, { RoomsToReserve } from './reserveTimes';
 import Webhook from './webhook';
 import Cleanup from './cleanup';
+import { Temporal } from '@js-temporal/polyfill';
+import calculateTime from './calculateTime';
 
 async function runConfigurations(
   webhook: Webhook,
@@ -12,10 +14,125 @@ async function runConfigurations(
   runs: Runs,
   ..._args: unknown[]
 ): Promise<void> {
+  // get library hours
+  const { days = 7 } = base;
+  const date = Temporal.Now.zonedDateTimeISO('America/Chicago')
+    .toPlainDate()
+    .add(Temporal.Duration.from(`P${days}D`));
+
+  const libraryHoursResponse = await fetch(base.urlHours, {
+    method: 'GET',
+    headers: {
+      Accept: '*/*',
+      'Accept-Language': 'en-US,en;q=0.7',
+      'Cache-Control': 'no-cache',
+      Referer: base.urlHoursHeader.referer,
+    },
+  });
+
+  type WeekDay = {
+    date: string; // YYYY-MM-DD
+    times: {
+      status: '24hours' | 'closed';
+      hours?: {
+        from: string;
+        to: string;
+      }[];
+      rendered?: string;
+      note?: string;
+    };
+  };
+
+  const libraryHoursJson = (await libraryHoursResponse.json()) as
+    | {
+        locations: LibraryHourLocation[];
+      }
+    | {
+        [index: `loc_${number}`]: LibraryHourLocation;
+      };
+
+  type LibraryHourLocation = {
+    lid: number;
+    weeks: {
+      Sunday: WeekDay;
+      Monday: WeekDay;
+      Tuesday: WeekDay;
+      Wednesday: WeekDay;
+      Thursday: WeekDay;
+      Friday: WeekDay;
+      Saturday: WeekDay;
+    }[]; // YYYY-MM-DD
+  };
+
+  const allHours = (
+    'locations' in libraryHoursJson
+      ? (libraryHoursJson.locations as LibraryHourLocation[]).find(
+          (location) => {
+            console.log(location.lid, base.urlHoursInstruction.lid);
+            return location.lid == base.urlHoursInstruction.lid;
+          },
+        )
+      : (libraryHoursJson[
+          `loc_${base.urlHoursInstruction.lid}`
+        ] as LibraryHourLocation)
+  )?.weeks.reduce<Record<string, WeekDay>>((prev, curr) => {
+    const temp = { ...prev };
+
+    Object.values(curr).forEach((weekday) => {
+      temp[weekday.date] = weekday;
+    });
+
+    return temp;
+  }, {});
+
+  let libraryHours: '24hr' | `${number}-${number}` | 'closed' = '24hr';
+  let libraryRendered = undefined;
+
+  // today in reference to the day we are reserving, not today "today"
+  const todaysHours = allHours?.[date.toString()];
+  if (todaysHours) {
+    console.log(todaysHours.times);
+    libraryRendered =
+      todaysHours.times.rendered?.split('\n')[1].trim() ??
+      todaysHours.times.note;
+    if (todaysHours.times.status === '24hours') {
+      libraryHours = '24hr';
+    }
+    if (todaysHours.times.status === 'closed') {
+      libraryHours = 'closed';
+    }
+    if (todaysHours.times.hours && todaysHours.times.hours.length > 1) {
+      throw new Error('This is the worst edgecase ever');
+    }
+    const start =
+      todaysHours.times.hours && calculateTime(todaysHours.times.hours[0].from);
+    const end =
+      todaysHours.times.hours &&
+      calculateTime(todaysHours.times.hours[0].to) - 1;
+    if (start !== undefined && end !== undefined) {
+      libraryHours = `${start}-${end}`;
+    }
+  }
+
+  if (libraryHours === 'closed') {
+    webhook.log(`No reservations made, library is closed: ${libraryRendered}`);
+    return;
+  }
+
   for (const run of runs) {
     const { url } = run;
 
     if (run.disabled) {
+      webhook.log(`Run skipped: Disabled`);
+      continue;
+    }
+
+    if (!run.runOn.includes(date.dayOfWeek)) {
+      webhook.log(
+        `Run skipped: Received ${date.dayOfWeek} but expected ${run.runOn[0]}-${
+          run.runOn[run.runOn.length - 1]
+        }`,
+      );
       continue;
     }
 
@@ -53,7 +170,7 @@ async function runConfigurations(
     // reservations are required to be adjacent, otherwise reserve in multiple attempts
     // index is time (0-48),
     const roomsToReserve: RoomsToReserve = [];
-    const zeroRooms: string[] = [];
+    const zeroRooms: Record<number, string[]> = [];
 
     webhook.log(`SCORING`);
 
@@ -84,11 +201,14 @@ async function runConfigurations(
         description ?? '',
         webhook,
         run,
+        libraryHours,
       );
 
-      if (score == 0) {
-        // Strip out location name
-        zeroRooms.push(name.replace(/^[^\d]*/g, ''));
+      if (score < 0) {
+        const trimmedName = name.replace(/^[^\d]*/g, '');
+        zeroRooms[score] = zeroRooms[score]
+          ? [...zeroRooms[score], trimmedName]
+          : [trimmedName];
       }
 
       let indexToInsertAt = roomsToReserve.findIndex(
@@ -106,9 +226,9 @@ async function runConfigurations(
       });
     }
 
-    if (zeroRooms.length > 0) {
-      webhook.log(`${zeroRooms.join(',')}:0`);
-    }
+    Object.entries(zeroRooms).map(([score, room]) => {
+      webhook.log(`${room.join(',')}:${score}`);
+    });
 
     webhook.log('\n');
 

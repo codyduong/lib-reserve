@@ -24,6 +24,11 @@ async function reserve(override?: ConfigurationBase): Promise<Response | void> {
   try {
     const configurations = await getConfiguration(options, override);
     webhook.loadConfiguration(...configurations);
+
+    if (override === undefined) {
+      webhook.log('**Running manually**\n');
+    }
+
     cleanup.loadConfigurations(...configurations);
     await runConfigurations(webhook, cleanup, ...configurations);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +43,10 @@ async function reserve(override?: ConfigurationBase): Promise<Response | void> {
   if (override !== undefined) {
     return new Response(webhook.dump());
   }
+}
+
+if (typeof Bun === 'undefined') {
+  throw new Error('This code is meant to be run with Bun, not Node or Deno!');
 }
 
 if (process.env['PORT']) {

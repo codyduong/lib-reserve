@@ -34,7 +34,7 @@ async function reserveTimes(
     url,
     urlTime,
     urlBook,
-    debug,
+    debug: _debug,
     dryRun,
     webhook,
     cleanup,
@@ -148,8 +148,11 @@ async function reserveTimes(
         continue;
       }
 
+      const fname = user.fname;
+      const lname = user.lname;
+
       if (dryRun) {
-        webhook.log(`#dry_runFoobar|${user?.email}`);
+        webhook.log(`#dry_runFoobar|${user?.email}|${fname} ${lname}`);
         success.push(...group);
         continue;
       }
@@ -174,8 +177,8 @@ async function reserveTimes(
       const body2 = new FormData();
 
       body2.append('session', `${session}`);
-      body2.append('fname', user.fname);
-      body2.append('lname', user.lname);
+      body2.append('fname', fname);
+      body2.append('lname', lname);
       body2.append('email', user.email);
       body2.append(
         'bookings',

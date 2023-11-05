@@ -1,12 +1,18 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { Configurations } from './getConfigurations';
 
+type MessageOptions = {
+  newline: boolean;
+};
+
+type Message = string | [string | undefined, MessageOptions | undefined];
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 class Webhook {
   #webhookURI: string | undefined;
   #date: Temporal.PlainDate;
   #dryRun: boolean;
-  #messages: Record<number, string[]>;
+  #messages: Record<number, Message[]>;
   #ping: string[];
 
   constructor() {
@@ -26,9 +32,9 @@ class Webhook {
     this.#ping = configuration.ping ?? [];
   }
 
-  #send(message?: any, group = 0): void {
+  #send(message?: Message, group = 0): void {
     this.#messages[group] = this.#messages[group] ?? [];
-    this.#messages[group].push(message);
+    this.#messages[group].push(message ?? '');
   }
 
   async send(): Promise<void> {
@@ -39,7 +45,16 @@ class Webhook {
             `**DEBUG LOG${this.#dryRun ? ' (DRY RUN)' : ''} - ${
               this.#date
             }**\n` +
-            messages.filter((message) => message !== undefined).join('\n'),
+            messages
+              // .filter((message) => message !== undefined)
+              .reduce((prev, message) => {
+                if (Array.isArray(message)) {
+                  const newline = message[1]?.newline ?? true;
+                  return `${prev}${newline ? '\n' : ''}${message[0] ?? ''}`;
+                }
+
+                return `${prev}\n${message}`;
+              }, ''),
         });
 
         console.log(payload, payload.length);
@@ -57,8 +72,8 @@ class Webhook {
     }
   }
 
-  log(message?: any, _?: any[]): void {
-    this.#send(message);
+  log(message?: string, options?: MessageOptions): void {
+    this.#send([message, options]);
     console.log(message);
   }
 
