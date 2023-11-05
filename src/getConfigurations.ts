@@ -181,13 +181,12 @@ export type Configurations = [ConfigurationBase, Runs, Temporal.PlainDate];
 
 async function getConfiguration(
   options: {
-    dry: boolean;
+    dry?: boolean;
     filepath: string | URL;
   },
-  override?: ConfigurationBase,
+  override?: Partial<ConfigurationBase>,
 ): Promise<Configurations> {
-  const { dry, filepath: configuration_location = './configuration.json' } =
-    options;
+  const { dry, filepath: configuration_location } = options;
 
   const configurationBase = JSON.parse(
     await Bun.file(configuration_location, { type: 'application/json' }).text(),

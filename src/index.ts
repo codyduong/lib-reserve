@@ -13,14 +13,19 @@ program.option(
 
 program.parse(Bun.argv);
 
-const options = program.opts<{ dry: boolean; filepath: string }>();
+const options = {
+  ...program.opts<Partial<{ dry: boolean; filepath: string }>>(),
+  filepath: './configuration.json',
+};
 
 const webhook = new Webhook();
 const cleanup = new Cleanup();
 
-async function reserve(override: ConfigurationBase): Promise<Response>;
+async function reserve(override: Partial<ConfigurationBase>): Promise<Response>;
 async function reserve(override?: undefined): Promise<void>;
-async function reserve(override?: ConfigurationBase): Promise<Response | void> {
+async function reserve(
+  override?: Partial<ConfigurationBase>,
+): Promise<Response | void> {
   try {
     const configurations = await getConfiguration(options, override);
     webhook.loadConfiguration(...configurations);
@@ -54,14 +59,26 @@ if (process.env['PORT']) {
     port: 3000,
     async fetch(req) {
       try {
-        if (req.method == 'POST') {
+        if (req.method === 'GET') {
+          // expose one GET method to dump configuration file for debugging purposes
+          await new Response(
+            await Bun.file(options.filepath, {
+              type: 'application/json',
+            }).text(),
+            {
+              headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+              },
+            },
+          );
+        }
+        if (req.method === 'POST') {
           const configuration = req.body ? await req.json() : {};
           return await reserve(configuration);
-        } else {
-          return new Response(undefined, {
-            status: 405,
-          });
         }
+        return new Response(undefined, {
+          status: 405,
+        });
       } catch (e) {
         // @ts-expect-error: yada
         console.log(e?.trace);
