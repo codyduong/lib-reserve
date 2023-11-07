@@ -254,7 +254,11 @@ async function reserveTimes(
 
       const response2json = await response2.json();
 
-      webhook.log(`#${response2json.bookId}|${user.email}`);
+      webhook.log(
+        `#${response2json.bookId}|${user.email}|${fname ?? user.fname} ${
+          lname ?? user.lname
+        }`,
+      );
 
       // remove session from cleanup if we booked the session
       cleanup.removeSession(session);
