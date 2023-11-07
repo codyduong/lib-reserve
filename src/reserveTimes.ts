@@ -5,6 +5,7 @@ import Webhook from './webhook';
 import { Temporal } from '@js-temporal/polyfill';
 import Cleanup from './cleanup';
 import { displaySlots } from './displaySlots';
+import popRandom from './popRandom';
 
 export type RoomsToReserve = {
   name: string;
@@ -21,6 +22,7 @@ export type ReserveTimesConfiguration = {
   webhook: Webhook;
   cleanup: Cleanup;
   amount: number;
+  nameOverride: ([fname: string, lname: string] | string)[] | undefined;
 };
 
 // naively assume sorted
@@ -39,11 +41,28 @@ async function reserveTimes(
     webhook,
     cleanup,
     amount: maxToReserve,
+    nameOverride,
   } = configuration;
 
   webhook.log(dryRun ? 'STARTING **DRY** RUN' : 'STARTING RUN');
 
   let numberReserved = 0;
+  let [fname, lname]: [string | undefined, string | undefined] = [
+    undefined,
+    undefined,
+  ];
+
+  if (nameOverride) {
+    const name = popRandom(nameOverride);
+    if (name) {
+      if (typeof name === 'string') {
+        fname = name;
+        lname = '';
+      } else {
+        [fname, lname] = name;
+      }
+    }
+  }
 
   for (const room of rooms) {
     if (room.score <= 0) {
@@ -88,7 +107,7 @@ async function reserveTimes(
 
     while (queue.length > 0) {
       const group = queue.shift()!;
-      const user = users.pop(); //users.pop();
+      const user = popRandom(users);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = new FormData();
@@ -148,11 +167,12 @@ async function reserveTimes(
         continue;
       }
 
-      const fname = user.fname;
-      const lname = user.lname;
-
       if (dryRun) {
-        webhook.log(`#dry_runFoobar|${user?.email}|${fname} ${lname}`);
+        webhook.log(
+          `#dry_runFoobar|${user?.email}|${fname ?? user.fname} ${
+            lname ?? user.lname
+          }`,
+        );
         success.push(...group);
         continue;
       }
@@ -177,8 +197,8 @@ async function reserveTimes(
       const body2 = new FormData();
 
       body2.append('session', `${session}`);
-      body2.append('fname', fname);
-      body2.append('lname', lname);
+      body2.append('fname', fname ?? user.fname);
+      body2.append('lname', lname ?? user.lname);
       body2.append('email', user.email);
       body2.append(
         'bookings',

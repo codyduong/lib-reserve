@@ -243,6 +243,7 @@ async function runConfigurations(
       webhook,
       cleanup,
       amount: run.amount,
+      nameOverride: run.nameOverride,
     });
   }
 }

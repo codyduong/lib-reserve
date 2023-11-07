@@ -18,6 +18,10 @@
       "email": "email@ku.edu"
     }
   ],
+  "nameOverride": [
+    ["Calc", "Group"],
+    ["EECS", "Project"]
+  ],
   "debug": true,
   "dryRun": true,
   "rooms": [

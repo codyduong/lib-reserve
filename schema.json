@@ -5,6 +5,9 @@
         "TimeCustom": {
             "additionalProperties": false,
             "properties": {
+                "$comment": {
+                    "type": "string"
+                },
                 "blacklist": {
                     "anyOf": [
                         {
@@ -128,9 +131,6 @@
                             26
                         ]
                     ]
-                },
-                "$comment": {
-                    "type": "string"
                 }
             },
             "type": "object"
@@ -221,6 +221,30 @@
         "dryRun": {
             "type": "boolean"
         },
+        "nameOverride": {
+            "description": "override reservation names rather than by user use a name from this list (randomly selected)",
+            "items": {
+                "anyOf": [
+                    {
+                        "items": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ],
+                        "maxItems": 2,
+                        "minItems": 2,
+                        "type": "array"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "type": "array"
+        },
         "ping": {
             "anyOf": [
                 {
@@ -310,6 +334,30 @@
                     "dryRun": {
                         "type": "boolean"
                     },
+                    "nameOverride": {
+                        "description": "override reservation names rather than by user use a name from this list (randomly selected)",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "items": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "maxItems": 2,
+                                    "minItems": 2,
+                                    "type": "array"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "type": "array"
+                    },
                     "runOn": {
                         "anyOf": [
                             {
@@ -330,7 +378,7 @@
                                 "maximum": 7
                             }
                         ],
-                        "default": "0-7",
+                        "default": "1-7",
                         "description": "ISO 8601 day number. 1 is Monday, and Sunday 7."
                     },
                     "times": {
@@ -434,9 +482,6 @@
                                                 26
                                             ]
                                         ]
-                                    },
-                                    "$comment": {
-                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -479,7 +524,7 @@
                     "maximum": 7
                 }
             ],
-            "default": "0-7",
+            "default": "1-7",
             "description": "ISO 8601 day number. 1 is Monday, and Sunday 7."
         },
         "times": {
@@ -583,9 +628,6 @@
                                     26
                                 ]
                             ]
-                        },
-                        "$comment": {
-                            "type": "string"
                         }
                     },
                     "type": "object"
@@ -614,7 +656,7 @@
             "type": "string"
         },
         "urlHours": {
-            "default": "https://calendar.lib.ku.edu/widget/hours/grid?iid=647&format=json&weeks=2&systemTime=1",
+            "default": "https://calendar.lib.ku.edu/widget/hours/grid?iid=647&format=json&weeks=2&systemTime=1&lid=19335",
             "format": "uri",
             "type": "string"
         },

@@ -89,6 +89,10 @@ export type RunConfiguration = {
    * @default "1-7"
    */
   runOn?: `${number}-${number}` | number[] | number;
+  /**
+   * override reservation names rather than by user use a name from this list (randomly selected)
+   */
+  nameOverride?: ([fname: string, lname: string] | string)[];
 };
 
 export type ConfigurationBase = {
@@ -173,6 +177,7 @@ export type Run = {
   disabled: boolean;
   amount: number;
   runOn: number[];
+  nameOverride: ([fname: string, lname: string] | string)[] | undefined;
 };
 
 export type Runs = Run[];
@@ -297,6 +302,7 @@ async function getConfiguration(
           parseTimeSingular(room.runOn) ??
           parseTimeSingular(configuration.runOn) ??
           parseTimeSingular(`1-7`),
+        nameOverride: room.nameOverride ?? configuration.nameOverride,
       });
     });
   } else {
@@ -326,6 +332,7 @@ async function getConfiguration(
       disabled: configuration.disabled ?? false,
       amount: configuration.amount ?? 1,
       runOn: parseTimeSingular(configuration.runOn) ?? parseTimeSingular('1-7'),
+      nameOverride: configuration.nameOverride,
     });
   }
 

@@ -61,7 +61,7 @@ Note the SCORING legend is as follows:
 
 The RUN legend is as follows:
 * `{time}|{session_id}`
-* `#{booking id}|{email}` booking id can be used to cancel or view reservation details
+* `#{booking id}|{email}|{fname} {lname}` booking id can be used to cancel or view reservation details
 * `◇` did not reserve
 * `◆` reserved
 
