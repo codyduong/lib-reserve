@@ -46,7 +46,11 @@ class Cleanup {
       });
 
       if (response.status !== 200) {
-        throw Error(`Unhandled status: ${response.status}`);
+        throw Error(
+          `Unhandled status: ${response.status}\n${await JSON.stringify(
+            response,
+          )}`,
+        );
       }
     });
   }

@@ -141,7 +141,11 @@ async function reserveTimes(
 
       // handle unexpected error codes
       if (response.status !== 200) {
-        throw Error(`Unhandled status: ${response.status}`);
+        throw Error(
+          `Unhandled status: ${response.status}\n${await JSON.stringify(
+            response,
+          )}`,
+        );
       }
 
       const dom = new JSDOM(await response.text());
@@ -241,7 +245,11 @@ async function reserveTimes(
 
       // handle unexpected error codes
       if (response2.status !== 200) {
-        throw Error(`Unhandled status: ${response2.status}`);
+        throw Error(
+          `Unhandled status: ${response2.status}\n${await JSON.stringify(
+            response2,
+          )}`,
+        );
       }
 
       const response2json = await response2.json();
