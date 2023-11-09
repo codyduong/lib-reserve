@@ -6,6 +6,7 @@ import Webhook from './webhook';
 import Cleanup from './cleanup';
 import { Temporal } from '@js-temporal/polyfill';
 import calculateTime from './calculateTime';
+import groupRooms from './groupRooms';
 
 async function runConfigurations(
   webhook: Webhook,
@@ -149,6 +150,17 @@ async function runConfigurations(
 
     const document = dom.window._document as Document;
 
+    // double check we are on a Springshare system
+    const isSpringshare =
+      document
+        .getElementById('s-lc-public-footer-brand')
+        ?.getElementsByTagName('a')[0]
+        .textContent?.trim() === 'Springshare';
+
+    if (!isSpringshare) {
+      throw new Error(`Not a Springshare Reservation System`);
+    }
+
     const checkboxes = document.getElementById(
       's-lc-eq-checkboxes',
     ) as HTMLDivElement;
@@ -234,7 +246,7 @@ async function runConfigurations(
 
     const lid = new URLSearchParams(run.url).get(run.url.split('=')[0])!;
 
-    await reserveTimes(roomsToReserve, base.users, lid, {
+    await reserveTimes(groupRooms(roomsToReserve), base.users, lid, {
       debug: run.debug,
       url: url,
       urlTime: run.urlTime,
