@@ -6,7 +6,7 @@ I make no gurantees made about the functionality of the program for any person(s
 
 > To reserve a room for a large rotating friend group that needs a dedicated study room throughout the day.
 
-A CLI or server (TODO better) which reserves library rooms at the University of Kansas. 
+A CLI or server which reserves library rooms at the University of Kansas. 
 It may similarly work on other systems powered by the same [Springshare](https://www.springshare.com/) system.
 
 It has a highly configurable input system. See [Configuration](#configuration) 
@@ -65,15 +65,18 @@ The RUN legend is as follows:
 * `◇` did not reserve
 * `◆` reserved
 
-### From Docker
-TODO
+<!-- ### From Docker
+TODO -->
 
 ## Usage
-The program expects either a set of command line arguments, many of which are required and can create a verbose command, or alternatively point to a valid
-configuration file.
 
 ### Command Line Arguments
-TODO
+```
+Options:
+  -d, --dry                       Enable dry run
+  -c, --configuration <filepath>  Specify configuration file location (default: "./configuration.json")
+  -h, --help                      display help for command
+```
 
 ### Configuration
 View an example configuration at [`./configuration-EXAMPLE.json`](./configuration-EXAMPLE.json).
@@ -92,12 +95,13 @@ A Cloud Schedular is also configured to run at midnight every night at CDT.
 
 ### Implementation
 
-We use the accessible page at `https://calendar.lib.ku.edu/r/accessible/availability?` since the checksums embedded in the `<input>` with a `data-crc` attribute. 
+We use the accessible page at `https://calendar.lib.ku.edu/r/accessible/availability` since the checksums embedded in the `<input>` with a `data-crc` attribute. 
 These checksums are needed for the POST request to lock and reserve our page.
 
 We will append some URL parameters (`?lid=17465&zone=0&gid=36998&capacity=2&space=0&date=01-01-2023`). 
 Location ID (LID) corresponds to physical building, while Group ID (GID) corresponds to category of room. 
-Capacity is a array index (1-indexed) associated with mapping capacity ranges of rooms to elements in an array. (IE. `capacity=2, indexes to 5-8, from [1-4, 5-8, 9-12]`)
+Capacity is a array index (1-indexed) associated with mapping capacity ranges of rooms to elements in an array. (IE. `capacity=2, indexes to 5-8, from [1-4, 5-8, 9-12]`).
+A zero or falsy capacity value indicates all values
 
 Rank the spaces in criteria and as specified by our `configuration.json`
 * By availability
