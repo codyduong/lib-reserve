@@ -207,6 +207,7 @@ async function runConfigurations(
       const name = fieldset
         .getElementsByTagName('legend')[0]
         .textContent!.trim();
+
       const [score, times] = getScore(
         fieldset,
         capacity,
@@ -216,7 +217,7 @@ async function runConfigurations(
         libraryHours,
       );
 
-      if (score < 0) {
+      if (score <= 0) {
         const trimmedName = name.replace(/^[^\d]*/g, '');
         zeroRooms[score] = zeroRooms[score]
           ? [...zeroRooms[score], trimmedName]

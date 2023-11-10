@@ -123,7 +123,7 @@ function getScore(
     description.includes('unavailable') ||
     description.includes('maintenance')
   ) {
-    score = 0;
+    score = -4;
   }
 
   // disregard if we don't have required times
@@ -173,7 +173,20 @@ function getScore(
       ? timeSlots.filter((time) => currentTimes?.whitelist.includes(time.time))
       : timeSlots;
 
-  return [score, filtered];
+  // prioritize required first
+  const requiredFirst =
+    currentTimes?.required && currentTimes?.required?.length > 0
+      ? [
+          ...filtered.filter((item) =>
+            currentTimes.required.includes(item.time),
+          ),
+          ...filtered.filter(
+            (item) => !currentTimes.required.includes(item.time),
+          ),
+        ]
+      : filtered;
+
+  return [score, requiredFirst];
 }
 
 export default getScore;
