@@ -4,8 +4,7 @@ import { ConfigurationBase } from './getConfigurations';
 import Webhook from './webhook';
 import { Temporal } from '@js-temporal/polyfill';
 import Cleanup from './cleanup';
-import { displaySlots } from './displaySlots';
-import popRandom from './popRandom';
+import { displaySlots, popRandom } from './util';
 
 export type RoomsToReserve = {
   name: string;

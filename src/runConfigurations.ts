@@ -5,7 +5,7 @@ import reserveTimes, { RoomsToReserve } from './reserveTimes';
 import Webhook from './webhook';
 import Cleanup from './cleanup';
 import { Temporal } from '@js-temporal/polyfill';
-import calculateTime from './calculateTime';
+import { calculateTime } from './util';
 import groupRooms from './groupRooms';
 
 async function runConfigurations(
