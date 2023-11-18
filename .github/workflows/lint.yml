@@ -1,4 +1,4 @@
-name: Run Lint on PR or Merge to Master
+name: Run Lint on PR
 
 on:
   pull_request:
@@ -15,6 +15,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Fetch origin/master
+      run: git fetch origin master:refs/remotes/origin/master
 
     - name: Setup Node.js
       uses: actions/setup-node@v2

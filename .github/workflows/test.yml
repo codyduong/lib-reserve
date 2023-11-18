@@ -1,4 +1,4 @@
-name: Run Tests on PR or Merge to Master
+name: Run Tests on PR or Merge
 
 on:
   pull_request:
