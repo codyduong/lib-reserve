@@ -116,7 +116,9 @@ async function runConfigurations(
   }
 
   if (libraryHours === 'closed') {
-    webhook.log(`No reservations made, library is closed: ${libraryRendered}`);
+    webhook.log(
+      `No reservations made, library is closed: ${libraryRendered ?? 'N/A'}`,
+    );
     return;
   }
 

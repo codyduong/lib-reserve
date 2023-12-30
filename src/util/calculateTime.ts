@@ -9,9 +9,6 @@ export function calculateTime(
     !time.toUpperCase().includes('AM') &&
     !time.toUpperCase().includes('PM')
   ) {
-    console.log(time);
-    console.log(!time.toUpperCase().includes('AM'));
-    console.log(!time.toUpperCase().includes('PM'));
     throw TypeError(
       'Expected AM or PM in the time string, 24hr strings are not supported',
     );
