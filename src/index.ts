@@ -61,7 +61,7 @@ if (process.env['PORT']) {
       try {
         if (req.method === 'GET') {
           // expose one GET method to dump configuration file for debugging purposes
-          await new Response(
+          return new Response(
             await Bun.file(options.filepath, {
               type: 'application/json',
             }).text(),

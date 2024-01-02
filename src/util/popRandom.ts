@@ -1,4 +1,4 @@
-export default function popRandom<T extends Array<unknown>>(
+export function popRandom<T extends Array<unknown>>(
   arr: T,
 ): T[number] | undefined {
   if (arr.length === 0) {

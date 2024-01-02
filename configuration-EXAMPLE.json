@@ -44,15 +44,20 @@
         },
         {
           "$comment": "Friday",
-          "when": "0-36",
-          "blacklist": [],
-          "required": "0-36"
+          "when": "0-35",
+          "required": "0-35"
+        },
+        {
+          "$comment": "Friday (early close)",
+          "when": "0-33",
+          "blacklist": "8-11",
+          "required": "0-7 12-33"
         },
         {
           "$comment": "Saturday",
-          "when": "24-34",
+          "when": "24-33",
           "blacklist": [],
-          "required": "24-34"
+          "required": "24-33"
         },
         {
           "$comment": "Sunday",

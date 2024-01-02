@@ -1,4 +1,4 @@
-name: Run Lint on PR
+name: Run Tests on PR or Merge
 
 on:
   workflow_dispatch:
@@ -10,20 +10,12 @@ on:
       - master
 
 jobs:
-  lint:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
-    - name: "Checkout master"
+    - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: master
-        fetch-depth: 0
-
-    - name: "Checkout HEAD"
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -54,4 +46,4 @@ jobs:
       run: bun install
 
     - name: Run Lint Script
-      run: bun run ./scripts/lint.ts
+      run: bun test

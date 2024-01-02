@@ -1,5 +1,4 @@
-import calculateTime from './calculateTime';
-import { displaySlots } from './displaySlots';
+import { calculateTime, displaySlots } from './util';
 import { Run } from './getConfigurations';
 import Webhook from './webhook';
 

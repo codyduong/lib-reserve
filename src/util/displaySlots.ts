@@ -1,4 +1,4 @@
-import type { ReservationSlot } from './getScore';
+import type { ReservationSlot } from '../getScore';
 
 export function displaySlots(slots: ReservationSlot[], flip = false): string {
   let availability = '';
