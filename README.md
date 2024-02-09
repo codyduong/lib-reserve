@@ -1,10 +1,15 @@
 # KU Library Reservation
 
-_**Preface and Warning**: It is recommended to create a fork of this repository to modify the source code as needed. 
-While the code was made with the vision of being highly configurable for many use-cases, a lot of it is untested. 
-I make no gurantees made about the functionality of the program for any person(s)' particular use-case._
+> [!CAUTION]
+> This could get you suspended or faced with discplinary action if you aren't careful. Don't abuse this and DDOS
+> your library. 
 
-> To reserve a room for a large rotating friend group that needs a dedicated study room throughout the day.
+> [!NOTE]
+> It is recommended to create a fork of this repository to modify the source code as needed. 
+> While the code was made with the vision of being highly configurable for many use-cases, a lot of it is untested.
+> I make no gurantees made about the functionality of the program for any person(s)' particular use-case.
+
+To reserve a room for a large rotating friend group that needs a dedicated study room throughout the day.
 
 A CLI or server which reserves library rooms at the University of Kansas. 
 It may similarly work on other systems powered by the same [Springshare](https://www.springshare.com/) system.
@@ -81,7 +86,7 @@ Options:
 ### Configuration
 View an example configuration at [`./configuration-EXAMPLE.json`](./configuration-EXAMPLE.json).
 
-View the full [`./schema`](./schema.json).
+Or view the full [`./schema.json`](./schema.json).
 
 ### Setting Up
 The code can be dockerized according to the [`Dockerfile`](./Dockerfile) and can run as a server or as a script. 
